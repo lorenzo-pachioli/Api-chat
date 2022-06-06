@@ -8,6 +8,6 @@ const messageSchema = new Schema({
     date: Date
 })
 
-const Message = model('Note', messageSchema)
+const Message = model('Message', messageSchema)
 
 module.exports = Message;

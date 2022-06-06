@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const {Server} = require('socket.io')
 const Message = require('./models/Message');
 
+app.use(express.json())
 app.use(cors())
 
 const server = http.createServer(app)
@@ -84,7 +85,7 @@ io.on("connection", (socket)=> {
 
 
 
-const port = process.env.PORT || 3001
-server.listen(port, ()=>{
-    console.log('Conected')
-})
+const Port = process.env.PORT || 3001
+app.listen(Port, ()=> {
+    console.log(`Server running on port ${Port}`)
+});

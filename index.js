@@ -19,6 +19,17 @@ const io = new Server(server, {
     }
 })
 
+app.get('/', (request, response)=> {
+    Message.find({})
+        .then(note => {
+            socket.to(data).emit("receive_chat", note)
+            console.log('note',data, note);
+            mongoose.connection.close()
+        })
+        .catch( err => socket.to(data).emit("receive_chat", `Error: ${err.status}`))
+        
+})
+
 io.on("connection", (socket)=> {
     console.log('id', socket.id)
 

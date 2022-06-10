@@ -38,11 +38,11 @@ io.on("connect", (socket)=> {
         
         try{
             const docRef =await Message.find({room:data})
-            socket.in(data).emit("chat", docRef)
+            io.sockets.in(data).emit("chat", docRef)
             console.log(`chat: ${docRef.length}, room:${data}`);
         }catch(err){
             console.log(`Error in geting chat: ${err}, data:${data}`);
-            socket.in(data).emit("receive_chat", `Error: ${err}`)
+            io.sockets.in(data).emit("receive_error", `Error: ${err}`)
         }
     })
     
@@ -63,13 +63,13 @@ io.on("connect", (socket)=> {
 
         newNote.save()
         .then(message => {
-            socket.in(data.room).emit("receive_message", message)
+            io.sockets.in(data.room).emit("receive_message", message)
             console.log(`User with ID: ${socket.id} sent msj: ${message.message}`);
             
         })
         .catch(err =>{
             console.log(`Error in saving msj: ${err}`);
-            socket.in(data.room).emit("receive_error", {...newNoteError, message: `error: ${err.status}`})
+            io.sockets.in(data.room).emit("receive_error", {...newNoteError, message: `error: ${err.status}`})
             
         })
         

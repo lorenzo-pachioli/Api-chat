@@ -4,7 +4,6 @@ const express = require('express')
 const app = express()
 const http = require('http')
 const cors = require("cors")
-const mongoose = require('mongoose');
 const {Server} = require('socket.io')
 const Message = require('./models/Message');
 
@@ -30,23 +29,23 @@ const io = new Server(server, {
         
 }) */
 
-io.on("connection", (socket)=> {
+io.on("connect", (socket)=> {
     console.log('id', socket.id)
 
-    socket.on("join_room", (data)=>{
-        socket.join(data);
+    socket.on("join_room",async (data)=>{
+        socket.join(data)
         console.log(`User with ID: ${socket.id} joined room: ${data}`);
-
-        Message.find({room:data})
-        .then(note => {
-            socket.to(data).emit("receive_chat", note)
-            console.log(`chat: ${data}`);
-        })
-        .catch( err => {
+        
+        try{
+            const docRef =await Message.find({room:data})
+            socket.to(data).emit("chat", docRef)
+            console.log(`chat: ${docRef.length}, room:${data}`);
+        }catch(err){
             console.log(`Error in geting chat: ${err}, data:${data}`);
             socket.to(data).emit("receive_chat", `Error: ${err}`)
-        })
+        }
     })
+    
 
     socket.once("send_message", (data)=>{
         console.log("data.time", data.time)

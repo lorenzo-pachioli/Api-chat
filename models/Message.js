@@ -4,8 +4,8 @@ const messageSchema = new Schema({
     message: String,
     id: Number,
     room: Number,
-    author: String,
-    date: Date
+    username: String,
+    time: String
 })
 
 const Message = model('Message', messageSchema)

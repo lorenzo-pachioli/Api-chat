@@ -5,7 +5,7 @@ const uri = process.env.MONGODB_URI;
 const db = `mongodb+srv://Lorenzo-Pachioli:${password}@cluster0.afsld.mongodb.net/?retryWrites=true&w=majority`;
 
 mongoose.connect(uri ? (uri):(db))
-.then(() => console.log('Connected'))
+.then(() => console.log('Conected'))
 .catch(error => console.error(error))
 
 

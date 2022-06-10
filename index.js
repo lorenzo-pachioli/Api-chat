@@ -15,12 +15,11 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors:{
-        origin:"*", 
-        methods: ["GET", "POST"]
+        origin:"http://localhost:3000" 
     }
 })
 
-app.get('/', (request, response)=> {
+/* app.get('/', (request, response)=> {
     Message.find({})
         .then(note => {
             socket.to(data).emit("receive_chat", note)
@@ -29,7 +28,7 @@ app.get('/', (request, response)=> {
         })
         .catch( err => socket.to(data).emit("receive_chat", `Error: ${err.status}`))
         
-})
+}) */
 
 io.on("connection", (socket)=> {
     console.log('id', socket.id)
@@ -38,37 +37,43 @@ io.on("connection", (socket)=> {
         socket.join(data);
         console.log(`User with ID: ${socket.id} joined room: ${data}`);
 
-        Message.find({room: data})
+        Message.find({room:data})
         .then(note => {
             socket.to(data).emit("receive_chat", note)
-            mongoose.connection.close()
+            console.log(`chat: ${data}`);
         })
-        .catch( err => socket.to(data).emit("receive_chat", `Error: ${err.status}`))
+        .catch( err => {
+            console.log(`Error in geting chat: ${err}, data:${data}`);
+            socket.to(data).emit("receive_chat", `Error: ${err}`)
         })
+    })
 
-    socket.on("send_message", (data)=>{
+    socket.once("send_message", (data)=>{
+        console.log("data.time", data.time)
         const newNote = Message({
+            room: data.room,
+            time: data.time,
             message: data.message,
-            id: data.id,
-            room: room,
-            author: username,
-            date: data.date
+            username: data.username
         })
         const newNoteError = Message({
-            
-            id: data.id,
-            room: room,
-            author: username,
-            date: data.date
+            content: data,
         })
 
+        console.log("data", newNote)
+
         newNote.save()
-        .then(note => {
-        socket.to(note.room).emit("receive_message", note)
-        mongoose.connection.close();
+        .then(message => {
+            socket.to(data.room).emit("receive_message", message)
+            console.log(`User with ID: ${socket.id} sent msj: ${message.message}`);
+            
         })
-        .catch(err =>socket.to(data.room).emit("receive_message", {...newNoteError, message: `error: ${err.status}`}))
-        console.log(`User with ID: ${socket.id} sent msj: ${data}`);
+        .catch(err =>{
+            console.log(`Error in saving msj: ${err}`);
+            socket.to(data.room).emit("receive_message", {...newNoteError, message: `error: ${err.status}`})
+            
+        })
+        
     })
 
     socket.on("disconnect", ()=>{
@@ -85,7 +90,8 @@ io.on("connection", (socket)=> {
 
 
 
-const Port = process.env.PORT || 3001
-app.listen(Port, ()=> {
-    console.log(`Server running on port ${Port}`)
-});
+const port = process.env.PORT || 3001
+server.listen(port, ()=>{
+    console.log('Connected')
+})
+

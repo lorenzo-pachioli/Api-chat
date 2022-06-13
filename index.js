@@ -6,6 +6,12 @@ const http = require('http')
 const cors = require("cors")
 const {Server} = require('socket.io')
 const Message = require('./models/Message');
+const {
+    sigUp,
+    logIn,
+    logOut, 
+    deleteUser
+} = require('./Controllers/userController');
 
 app.use(express.json())
 app.use(cors())
@@ -18,21 +24,17 @@ const io = new Server(server, {
     }
 })
 
-/* app.get('/', (request, response)=> {
-    Message.find({})
-        .then(note => {
-            socket.to(data).emit("receive_chat", note)
-            console.log('note',data, note);
-            mongoose.connection.close()
-        })
-        .catch( err => socket.to(data).emit("receive_chat", `Error: ${err.status}`))
-        
-}) */
+
 
 io.on("connect", (socket)=> {
     console.log('id', socket.id)
 
-    socket.on("join_room",async (data)=>{
+    socket.on("sign_up", data => sigUp(data,io));
+    socket.on("log_in", data => logIn(data,io));
+    socket.on("log_out", data => logOut(data,io));
+    socket.on("delete_user", data => deleteUser(data,io));
+
+    socket.once("join_room",async (data)=>{
         socket.join(data)
         console.log(`User with ID: ${socket.id} joined room: ${data}`);
         

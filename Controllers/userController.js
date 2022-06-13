@@ -4,25 +4,24 @@ const Message = require("../models/Message");
 
 module.exports.signup = async(data,io)=>{
     try{
-        const { firstName, lastName, type, email, password } = data;
+        const { firstName, lastName, email, password } = data;
         const userCheck = await User.findOne({ email: email });
         if (userCheck){
-            io.sockets.in(email).emit("sign_up_res", { msg: "Email already used", status: false });
+            io.sockets.to(io.socket.id).emit("sign_up_res", { msg: "Email already used", status: false });
             return  socket.disconnect(true)
         }
         /* const hashedPassword = await bcrypt.hash(password, 10); */
         const newUser = User({
             firstName: firstName,
             lastName: lastName,
-            type: type,
             email: email,
             password: password 
         })
         newUser.save()
-        .then(response => io.sockets.in(email).emit("sign_up_res", { status: true, response }))
-        .catch(err => io.sockets.in(email).emit("sign_up_res", {msj: "Error saving new user", status: false, error: err}));
+        .then(response => io.sockets.to(io.socket.id).emit("sign_up_res", { status: true, response }))
+        .catch(err => io.sockets.to(io.socket.id).emit("sign_up_res", {msj: "Error saving new user", status: false, error: err}));
     }catch(err){
-        err => io.sockets.in(email).emit("sign_up_res", {msj: "Error creating new user", status: false, error: err});
+        err => io.sockets.to(io.socket.id).emit("sign_up_res", {msj: "Error creating new user", status: false, error: err});
     }
 }
 

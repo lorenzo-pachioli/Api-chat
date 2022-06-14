@@ -82,6 +82,48 @@ module.exports.deleteUser = async (data, io, socket)=>{
     }
 }
 
+module.exports.getUsers = async (data, io, id)=>{
+    try{
+        const {_id, otherUser} = data;
+        const userCheck = await User.findById(_id);
+        if(!userCheck._id){
+            io.to(id).emit("get_users_res", { msg: "Must be loged in to get list", status: false });
+            return console.log("Must be loged in to get list")
+        }
+        if(otherUser){
+            try{
+                const docRef = await User.findById(otherUser)
+                io.to(id).emit("get_users_res", { users: {
+                    _id:docRef._id,
+                    firstName: docRef.firstName,
+                    lastName: docRef.lastName,
+                    email: docRef.email
+                }, status: 200 });
+                
+            }catch(err){
+                io.to(id).emit("get_users_res", { msg: "Error geting user by id", error:err, status: err.status });
+                return console.log("Error geting user by id")
+            }
+        }
+        try{
+            const docRef = await User.find({})
+            const passwordFiltered = docRef.map((user)=>{
+                return {
+                    _id:user._id,
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    email: user.email
+                }
+            })
+            io.to(id).emit("get_users_res", { users: passwordFiltered, status: 200 });
+        }catch(err){
+            io.to(id).emit("get_users_res", { msg: "Error geting all users", error:err, status: err.status });
+        }
+    }catch(err){
+        io.to(id).emit("get_users_res", { msg: "Error geting users", error:err, status: err.status });
+    }
+}
+
 
 
 

@@ -8,10 +8,10 @@ const {Server} = require('socket.io')
 const Message = require('./models/Message');
 const User = require('./models/User')
 const {
-    sigUp,
+    signUp,
     logIn,
     logOut, 
-    deleteUser
+    deleteUser,
 } = require('./Controllers/userController');
 
 app.use(express.json())
@@ -30,38 +30,12 @@ const io = new Server(server, {
 io.on("connect", (socket)=> {
     console.log('id', socket.id)
 
-    socket.on("sign_up", async (data) => {
-        try{
-            console.log(data)
-            const { firstName, lastName, email, password } = data;
-            const userCheck = await User.findOne({ email: email });
-            console.log(userCheck)
-            if (userCheck){
-                return io.to(socket.id).emit("sign_up_res", { msg: "Email already used", status: false });
-                
-            }
-            /* const hashedPassword = await bcrypt.hash(password, 10); */
-            const newUser = User({
-                firstName: firstName,
-                lastName: lastName,
-                email: email,
-                password: password 
-            })
-            newUser.save()
-            .then(response => {
-                console.log('response', response)
-                io.to(socket.id).emit("sign_up_res", { status: true, response })
-            })
-            .catch(err =>io.to(socket.id).emit("sign_up_res", {msj: "Error saving new user", status: false, error: err}));
-        }catch(err){
-            err => io.to(io.socket.id).emit("sign_up_res", {msj: "Error creating new user", status: false, error: err});
-        }
-    });
+    socket.on("sign_up", (data) => signUp(data, io, socket.id));
 
 
-    socket.on("log_in", data => logIn(data,io));
-    socket.on("log_out", data => logOut(data,io));
-    socket.on("delete_user", data => deleteUser(data,io));
+    socket.on("log_in", data => logIn(data,io, socket.id));
+    socket.on("log_out", () => logOut(io, socket));
+    socket.on("delete_user", data => deleteUser(data,io, socket));
 
     socket.once("join_room",async (data)=>{
         socket.join(data)

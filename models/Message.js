@@ -4,7 +4,7 @@ const messageSchema = new Schema({
     message: String,
     room: String,
     user: Object,
-    time: String
+    time: Date
 })
 
 const Message = model('Message', messageSchema)

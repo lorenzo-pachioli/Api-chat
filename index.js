@@ -13,8 +13,7 @@ const {
     deleteUser,
     getUsers 
 } = require('./Controllers/userController');
-const {sendMsg} = require('./Controllers/messageControllers');
-const {joinRoom} = require('./Controllers/roomController');
+const {initRoom, sendMessage, readBy} = require('./Controllers/roomController');
 
 app.use(express.json())
 app.use(cors())
@@ -38,10 +37,9 @@ io.on("connect", (socket)=> {
     socket.on("get_users", data=> getUsers(data, io, socket.id));
 
     //Room controller
-    socket.once("join_room", data=> joinRoom(data, io, socket.id));
-
-    //Message controller
-    socket.once("send_message", (data)=> sendMsg(data, io, socket.id))
+    socket.once("init_room", data=> initRoom(data, io, socket));
+    socket.once("send_msg", data=> sendMessage(data, io, socket.id));
+    socket.once("read_msg", data=> readBy(data, io, socket.id));
 
     socket.on("disconnect", ()=>{
         console.log('disconnected', socket.id)

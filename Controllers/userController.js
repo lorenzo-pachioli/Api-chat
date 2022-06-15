@@ -92,7 +92,7 @@ module.exports.getUsers = async (data, io, id)=>{
         }
         if(otherUser){
             try{
-                const docRef = await User.findById(otherUser)
+                const docRef = await User.findById(otherUser, {password:0})
                 io.to(id).emit("get_users_res", { users: {
                     _id:docRef._id,
                     firstName: docRef.firstName,
@@ -106,7 +106,8 @@ module.exports.getUsers = async (data, io, id)=>{
             }
         }
         try{
-            const docRef = await User.find({})
+            const docRef = await User.find({},{password:0})
+            console.log(docRef)
             const passwordFiltered = docRef.map((user)=>{
                 return {
                     _id:user._id,

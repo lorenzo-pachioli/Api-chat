@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const Message = require("../models/Message");
+const Room = require("../models/Room");
 
 
 module.exports.signUp = async(data,io, id)=>{
@@ -17,14 +18,14 @@ module.exports.signUp = async(data,io, id)=>{
             password: password 
         })
         newUser.save()
-        .then(response => io.to(id).emit("sign_up_res", { status: true, response }))
-        .catch(err => io.to(id).emit("sign_up_res", {msj: "Error saving new user", status: err.status, error: err}));
+        .then(() => io.to(id).emit("sign_up_res", {status: true}))
+        .catch(err => io.to(id).emit("sign_up_res", {msg: "Error saving new user", status: false, error: err}));
     }catch(err){
-        err => io.to(id).emit("sign_up_res", {msj: "Error creating new user", status: err.status, error: err});
+        err => io.to(id).emit("sign_up_res", {msg: "Error creating new user", status: false, error: err});
     }
 }
 
-module.exports.logIn = async (data,io, id)=>{
+module.exports.logIn = async (data,io, socket)=>{
     try{
         const { email, password } = data;
         const userCheck = await User.findOne({ email: email });
@@ -39,13 +40,16 @@ module.exports.logIn = async (data,io, id)=>{
         }
 
         try{
-            const docRef =await Message.find({})
-            io.to(id).emit("log_in_res", { status: true, user: userCheck, messages: docRef })
+            const docRef =await Room.find({users:{$all:userCheck._id.toString()}})
+            docRef.map((room)=>{
+                socket.join(room._id.toString())
+            })
+            io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef })
         }catch(err){
-            io.to(id).emit("log_in_res", {error: err})
+            io.to(socket.id).emit("log_in_res", {error: err, msg: "Error geting chats", status: false})
         }
     }catch(err){
-        io.to(id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
+        io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
     }
 }
 
@@ -101,27 +105,19 @@ module.exports.getUsers = async (data, io, id)=>{
                 }, status: 200 });
                 
             }catch(err){
-                io.to(id).emit("get_users_res", { msg: "Error geting user by id", error:err, status: err.status });
+                io.to(id).emit("get_users_res", { msg: "Error geting user by id", error:err, status: false });
                 return console.log("Error geting user by id")
             }
         }
         try{
             const docRef = await User.find({},{password:0})
-            console.log(docRef)
-            const passwordFiltered = docRef.map((user)=>{
-                return {
-                    _id:user._id,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    email: user.email
-                }
-            })
-            io.to(id).emit("get_users_res", { users: passwordFiltered, status: 200 });
+            /* console.log(docRef) */
+            io.to(id).emit("get_users_res", { users: docRef, status: true });
         }catch(err){
-            io.to(id).emit("get_users_res", { msg: "Error geting all users", error:err, status: err.status });
+            io.to(id).emit("get_users_res", { msg: "Error geting all users", error:err, status: false });
         }
     }catch(err){
-        io.to(id).emit("get_users_res", { msg: "Error geting users", error:err, status: err.status });
+        io.to(id).emit("get_users_res", { msg: "Error geting users", error:err, status: false });
     }
 }
 

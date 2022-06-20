@@ -3,8 +3,8 @@ const Message = require('./Message');
 const User = require('./User');
 
 const roomSchema = new Schema({
-    messages: [Message],
-    users: [User] // o users:[User] pero sin password
+    messages: [Object],
+    users: [Object] // o users:[User] pero sin password
 })
 
 const Room = model('Room', roomSchema)

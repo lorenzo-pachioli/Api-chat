@@ -3,7 +3,8 @@ const {Schema, model} = require('mongoose');
 const messageSchema = new Schema({
     message: String,
     room: String,
-    user: Object,
+    user: String,
+    readBy:[String],
     time: Date
 })
 

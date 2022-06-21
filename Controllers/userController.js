@@ -39,15 +39,13 @@ module.exports.logIn = async (data,io, socket)=>{
             return console.log("Wrong password");
         }
 
-        try{
-            const docRef =await Room.find({users:{$all:userCheck._id.toString()}})
-            docRef.map((room)=>{
-                socket.join(room._id.toString())
-            })
-            io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef })
-        }catch(err){
-            io.to(socket.id).emit("log_in_res", {error: err, msg: "Error geting chats", status: false})
-        }
+        
+        const docRef =await Room.find({users:{$all:userCheck._id.toString()}})
+        docRef.map((room)=>{
+            socket.join(room._id.toString())
+        })
+        io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef })
+        
     }catch(err){
         io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
     }

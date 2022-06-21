@@ -38,7 +38,7 @@ io.on("connect", (socket)=> {
 
     //Room controller
     socket.on("init_room", data=> initRoom(data, io, socket));
-    socket.on("send_msg", data=> sendMessage(data, io, socket.id, next));
+    socket.on("send_msg", data=> sendMessage(data, io, socket.id));
     socket.on("read_msg", data=> readBy(data, io, socket.id));
     socket.on("delete_msg", data=> deleteMsg(data, io, socket.id));
     socket.on("delete_chat", data=> deleteChat(data, io, socket.id));

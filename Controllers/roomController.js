@@ -6,36 +6,33 @@ const ObjectId = require('mongoose').Types.ObjectId;
 module.exports.initRoom = async (data, io, socket)=>{
     try{
         const {_id, otherUser} = data;
-        const user1 = User.findById(_id,{password:0})
-        const user2 = User.findById(otherUser,{password:0})
+        const user1 =await User.findById(_id,{password:0})
+        const user2 =await User.findById(otherUser,{password:0})
         if(!user1 || !user2){
-            io.to(id).emit("init_room_res", {msg:'incorrect users id or they dont exist',room:[], status: false});
+            io.to(socket.id).emit("init_room_res", {msg:'incorrect users id or they dont exist',room:[], status: false});
             return console.log('incorrect users id or they dont exist')
         }
-        const roomCheck = Room.find({users:{$all:[_id, otherUser]}})
-        if(roomCheck._id){
-            const updateSend = {
-                $addToSet: { "messages.$[].readBy": _id}
-            };
-            const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true})
-            io.to(id).emit("init_room_res", {msg:`Joined to room ${roomCheck._id}`,room: docRef, status: true});
-            return socket.join(roomCheck._id);
+        const roomCheck = await Room.find({users:{$all:[_id.toString(), otherUser.toString()]}})
+        if(roomCheck[0]){
+            let docRef = roomCheck[0];
+            if(roomCheck[0].messages.length > 0){
+                const updateSend = {
+                    $addToSet: { "messages.$[].readBy": _id}
+                };
+                docRef =await Room.findByIdAndUpdate(roomCheck[0]._id.toString(), updateSend, {new:true})
+            }
+            socket.join(docRef._id.toString())
+            io.to(socket.id).emit("init_room_res", {msg:`Joined to room ${roomCheck[0]._id}`,room: docRef, status: true});
+            return console.log(`Joined to room ${roomCheck[0]._id}`)
         }
         const newRoom = Room({
             messages:[],
             users:[_id, otherUser] 
         })
-        console.log(newRoom);
-        try{
-            const docRef = await newRoom.save()
-            
-            socket.join(docRef._id)
-            io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
-            return console.log('docRef', docRef);
-        }catch(err){
-            io.to(socket.id).emit("init_room_res", {msg:'Error saving room',error:err, status: false});
-            return console.log('Error saving room',err)
-        }
+        const docRef = await newRoom.save()
+        socket.join(docRef._id)
+        io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
+        return console.log('docRef', docRef);    
     }catch(err){
         return io.to(socket.id).emit("init_room_res", {msg:'Error initiating room',error:err, status: false});
     }
@@ -62,16 +59,15 @@ module.exports.sendMessage = async (data, io, id)=>{
             time: new Date(Date.now())
         })
         const updateRead = {
-            $addToSet:{"messages.$[].readBy": _id},
-            $addToSet:{messages: newMessage}
+            $addToSet:{"messages.$[].readBy": _id}
         };
         const updateSend = {
-            $push:{messages: newMessage}
+            $addToSet:{messages: newMessage}
         };
-
-        const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
+        roomCheck.messages.length > 0 ? (await Room.findByIdAndUpdate(room, updateRead)):('')
+        const docRef =await Room.findByIdAndUpdate(room, updateSend, {new:true})
         io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
-        return console.log(`chat: ${room}`);
+        return console.log(`chat: ${docRef}`);
        
     }catch(err){
         io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
@@ -88,9 +84,9 @@ module.exports.readBy = async (data, io, id)=>{
             return console.log("Error user doesn't exist");
         }
         const updateSend = {
-            $addToSet: { messages: {readBy: _id}}
+            $addToSet:{"messages.$[].readBy": _id}
         };
-       /*  const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true}) */
+        const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true})
        io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
        return console.log("read_msg_res", room_id);
 

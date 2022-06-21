@@ -61,23 +61,18 @@ module.exports.sendMessage = async (data, io, id)=>{
             readBy:[_id],
             time: new Date(Date.now())
         })
-        try{
-            const updateRead = {
-                $addToSet:{"messages.$[].readBy": _id},
-                $addToSet:{messages: newMessage}
-            };
-            const updateSend = {
-                $push:{messages: newMessage}
-            };
+        const updateRead = {
+            $addToSet:{"messages.$[].readBy": _id},
+            $addToSet:{messages: newMessage}
+        };
+        const updateSend = {
+            $push:{messages: newMessage}
+        };
 
-            const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
-            io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
-            return console.log(`chat: ${room}, ${docRef.messages}`);
-            
-        }catch(err){
-            io.to(id).emit("send_msg_res", {msg: "Error in saving message",error:err, status: false});
-            return console.log(`Error in geting chat: ${err}`);
-        }
+        const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
+        io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
+        return console.log(`chat: ${room}, ${docRef.messages}`);
+       
     }catch(err){
         io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
         return console.log(`Error in geting data: ${err}`);

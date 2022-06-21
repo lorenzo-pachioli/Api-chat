@@ -71,7 +71,7 @@ module.exports.sendMessage = async (data, io, id)=>{
 
         const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
         io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
-        return console.log(`chat: ${room}, ${docRef.messages}`);
+        return console.log(`chat: ${room}`);
        
     }catch(err){
         io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});

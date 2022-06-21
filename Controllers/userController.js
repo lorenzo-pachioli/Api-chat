@@ -46,7 +46,7 @@ module.exports.logIn = async (data,io, socket)=>{
             socket.join(room._id.toString())
         })
         io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef });
-        return console.log("log_in_res", room._id);
+        return console.log("log_in_res");
         
     }catch(err){
         io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
@@ -105,7 +105,7 @@ module.exports.getUsers = async (data, io, id)=>{
                     lastName: docRef.lastName,
                     email: docRef.email
                 }, status: 200 });
-                return console.log(docRef)
+                return console.log("get_users_res")
                 
             }catch(err){
                 io.to(id).emit("get_users_res", { msg: "Error geting user by id", error:err, status: false });

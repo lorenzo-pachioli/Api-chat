@@ -8,7 +8,8 @@ module.exports.signUp = async(data,io, id)=>{
         const { firstName, lastName, email, password } = data;
         const userCheck = await User.findOne({ email: email });
         if (userCheck){
-            return io.to(id).emit("sign_up_res", { msg: "Email already used", status: false });
+            io.to(id).emit("sign_up_res", { msg: "Email already used", status: false });
+            return console.log("Email already used");
         }
         /* const hashedPassword = await bcrypt.hash(password, 10); */
         const newUser = User({
@@ -44,10 +45,12 @@ module.exports.logIn = async (data,io, socket)=>{
         docRef.map((room)=>{
             socket.join(room._id.toString())
         })
-        return io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef });
+        io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef });
+        return console.log("log_in_res", room._id);
         
     }catch(err){
-        return io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
+        io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
+        return console.log("Error loging in",err);
     }
 }
 
@@ -58,7 +61,8 @@ module.exports.logOut = async (io, socket)=>{
         }
 
     }catch(err){
-        return io.to(socket.id).emit("log_out_res", { msg: "Error disconnecting", error:err, status: err.status });
+        io.to(socket.id).emit("log_out_res", { msg: "Error disconnecting", error:err, status: err.status });
+        return console.log("Error disconnecting", err);
 
     }
 }
@@ -80,7 +84,7 @@ module.exports.deleteUser = async (data, io, socket)=>{
         }
         
     }catch(err){
-        return io.to(id).emit("log_out_res", { msg: "Error dsiconnecting", error:err, status: err.status });
+        err => io.to(id).emit("log_out_res", { msg: "Error dsiconnecting", error:err, status: err.status });
     }
 }
 
@@ -110,13 +114,14 @@ module.exports.getUsers = async (data, io, id)=>{
         }
         try{
             const docRef = await User.find({},{password:0})
-            /* console.log(docRef) */
-            return io.to(id).emit("get_users_res", { users: docRef, status: true });
+            
+            io.to(id).emit("get_users_res", { users: docRef, status: true });
+            return console.log(docRef)
         }catch(err){
-            return io.to(id).emit("get_users_res", { msg: "Error geting all users", error:err, status: false });
+            err => io.to(id).emit("get_users_res", { msg: "Error geting all users", error:err, status: false });
         }
     }catch(err){
-        return io.to(id).emit("get_users_res", { msg: "Error geting users", error:err, status: false });
+        err=> io.to(id).emit("get_users_res", { msg: "Error geting users", error:err, status: false });
     }
 }
 

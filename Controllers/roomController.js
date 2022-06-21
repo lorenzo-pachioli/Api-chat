@@ -28,11 +28,13 @@ module.exports.initRoom = async (data, io, socket)=>{
         console.log(newRoom);
         try{
             const docRef = await newRoom.save()
-            console.log('docRef', docRef);
+            
             socket.join(docRef._id)
-            return io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
+            io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
+            return console.log('docRef', docRef);
         }catch(err){
-            return io.to(socket.id).emit("init_room_res", {msg:'Error saving room',error:err, status: false});
+            io.to(socket.id).emit("init_room_res", {msg:'Error saving room',error:err, status: false});
+            return console.log('Error saving room',err)
         }
     }catch(err){
         return io.to(socket.id).emit("init_room_res", {msg:'Error initiating room',error:err, status: false});
@@ -69,15 +71,16 @@ module.exports.sendMessage = async (data, io, id)=>{
             };
 
             const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
-            console.log(`chat: ${room}, ${docRef.message}`);
-            return io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
+            io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
+            return console.log(`chat: ${room}, ${docRef.messages}`);
             
         }catch(err){
-            console.log(`Error in geting chat: ${err}`);
-            return io.to(id).emit("send_msg_res", {msg: "Error in saving message",error:err, status: false});
+            io.to(id).emit("send_msg_res", {msg: "Error in saving message",error:err, status: false});
+            return console.log(`Error in geting chat: ${err}`);
         }
     }catch(err){
-        return io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
+        io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return console.log(`Error in geting data: ${err}`);
     }
 }
 
@@ -93,10 +96,12 @@ module.exports.readBy = async (data, io, id)=>{
             $addToSet: { messages: {readBy: _id}}
         };
        /*  const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true}) */
-       return io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
+       io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
+       return console.log("read_msg_res", room_id);
 
     }catch(err){
-        return io.to(id).emit("read_msg_res", {msg: "Error in geting data", error:err, status: false});
+        io.to(id).emit("read_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return console.log("Error in geting data",err);
     }
 }
 
@@ -114,11 +119,13 @@ module.exports.deleteMsg = async (data, io, id)=>{
         };
 
         const docRef =await Room.findByIdAndUpdate(room_id, updateDelete,{new:true})
-        console.log(docRef)
-        return io.sockets.in(room_id).emit("delete_msg_res", {room:docRef, status:true});
+        
+        io.sockets.in(room_id).emit("delete_msg_res", {room:docRef, status:true});
+        return console.log(docRef)
 
     }catch(err){
-        return io.to(id).emit("delete_msg_res", {msg: "Error in geting data", error:err, status: false});
+        io.to(id).emit("delete_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return console.log("Error in geting data", err);
     }
 }
 
@@ -131,8 +138,9 @@ module.exports.deleteChat = async (data, io, id)=>{
             return console.log("Error user doesn't exist");
         }
         const docRef =await Room.findByIdAndDelete(room_id,{new:true})
-        console.log(docRef)
-        return io.sockets.in(room_id).emit("delete_chat_res", {room:docRef, status:true});
+        
+        io.sockets.in(room_id).emit("delete_chat_res", {room:docRef, status:true});
+        return console.log(docRef)
 
     }catch(err){
         return io.to(id).emit("delete_chat_res", {msg: "Error in geting data", error:err, status: false});

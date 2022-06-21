@@ -30,12 +30,12 @@ module.exports.initRoom = async (data, io, socket)=>{
             const docRef = await newRoom.save()
             console.log('docRef', docRef);
             socket.join(docRef._id)
-            io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
+            return io.sockets.in(docRef._id).emit("init_room_res", {room:docRef, status: true})
         }catch(err){
-            io.to(socket.id).emit("init_room_res", {msg:'Error saving room',error:err, status: false});
+            return io.to(socket.id).emit("init_room_res", {msg:'Error saving room',error:err, status: false});
         }
     }catch(err){
-        io.to(socket.id).emit("init_room_res", {msg:'Error initiating room',error:err, status: false});
+        return io.to(socket.id).emit("init_room_res", {msg:'Error initiating room',error:err, status: false});
     }
 }
 
@@ -70,14 +70,14 @@ module.exports.sendMessage = async (data, io, id)=>{
 
             const docRef =await Room.findByIdAndUpdate(room, roomCheck.messages.length > 0 ? (updateRead):(updateSend), {new:true})
             console.log(`chat: ${room}, ${docRef.message}`);
-            io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
+            return io.sockets.in(room).emit("send_msg_res", {room:docRef, newMessage:newMessage, status:true})
             
         }catch(err){
             console.log(`Error in geting chat: ${err}`);
-            io.to(id).emit("send_msg_res", {msg: "Error in saving message",error:err, status: false});
+            return io.to(id).emit("send_msg_res", {msg: "Error in saving message",error:err, status: false});
         }
     }catch(err){
-        io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return io.to(id).emit("send_msg_res", {msg: "Error in geting data", error:err, status: false});
     }
 }
 
@@ -93,10 +93,10 @@ module.exports.readBy = async (data, io, id)=>{
             $addToSet: { messages: {readBy: _id}}
         };
        /*  const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true}) */
-        io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
+       return io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
 
     }catch(err){
-        io.to(id).emit("read_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return io.to(id).emit("read_msg_res", {msg: "Error in geting data", error:err, status: false});
     }
 }
 
@@ -115,10 +115,10 @@ module.exports.deleteMsg = async (data, io, id)=>{
 
         const docRef =await Room.findByIdAndUpdate(room_id, updateDelete,{new:true})
         console.log(docRef)
-        io.sockets.in(room_id).emit("delete_msg_res", {room:docRef, status:true});
+        return io.sockets.in(room_id).emit("delete_msg_res", {room:docRef, status:true});
 
     }catch(err){
-        io.to(id).emit("delete_msg_res", {msg: "Error in geting data", error:err, status: false});
+        return io.to(id).emit("delete_msg_res", {msg: "Error in geting data", error:err, status: false});
     }
 }
 
@@ -132,10 +132,10 @@ module.exports.deleteChat = async (data, io, id)=>{
         }
         const docRef =await Room.findByIdAndDelete(room_id,{new:true})
         console.log(docRef)
-        io.sockets.in(room_id).emit("delete_chat_res", {room:docRef, status:true});
+        return io.sockets.in(room_id).emit("delete_chat_res", {room:docRef, status:true});
 
     }catch(err){
-        io.to(id).emit("delete_chat_res", {msg: "Error in geting data", error:err, status: false});
+        return io.to(id).emit("delete_chat_res", {msg: "Error in geting data", error:err, status: false});
     }
 }
 

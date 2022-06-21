@@ -15,6 +15,7 @@ const {
 } = require('./Controllers/userController');
 const {initRoom, sendMessage, readBy, deleteMsg, deleteChat} = require('./Controllers/roomController');
 
+app.use(express.json())
 app.use(cors())
 
 const server = http.createServer(app)

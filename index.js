@@ -6,13 +6,7 @@ const app = express()
 const http = require('http')
 const cors = require("cors")
 const {Server} = require('socket.io')
-const {
-    signUp,
-    logIn,
-    logOut, 
-    deleteUser,
-    getUsers 
-} = require('./Controllers/userController');
+const {signUp,logIn,logOut, deleteUser,getUsers,online } = require('./Controllers/userController');
 const {initRoom, sendMessage, readBy, deleteMsg, deleteChat} = require('./Controllers/roomController');
 
 app.use(express.json())
@@ -26,15 +20,21 @@ const io = new Server(server, {
     }
 })
 
+
 io.on("connect", (socket)=> {
     console.log('id', socket.id)
+    let user={};
 
     //User controller
     socket.on("sign_up", (data) => signUp(data, io, socket.id));
-    socket.on("log_in", data => logIn(data,io, socket));
+    socket.on("log_in", data =>{
+        logIn(data,io, socket)
+        return user={email:data.email, password:data.password}
+    });
     socket.on("log_out", () => logOut(io, socket));
     socket.on("delete_user", data => deleteUser(data,io, socket));
     socket.on("get_users", data=> getUsers(data, io, socket.id));
+    socket.on("online", data=> online(data, io, socket.id));
 
     //Room controller
     socket.on("init_room", data=> initRoom(data, io, socket));
@@ -43,8 +43,11 @@ io.on("connect", (socket)=> {
     socket.on("delete_msg", data=> deleteMsg(data, io, socket.id));
     socket.on("delete_chat", data=> deleteChat(data, io, socket.id));
 
+    socket.on("log_user", ()=>console.log(user))
+
     socket.on("disconnect", ()=>{
-        console.log('disconnected', socket.id)
+        online({...user, online:false}, io, socket.id)
+        console.log('disconnected', user)
     })
 })
 

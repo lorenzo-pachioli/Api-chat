@@ -42,6 +42,11 @@ module.exports.sendMessage = async (data, io, id)=>{
     try{
         const {_id, room, message} = data;
         console.log(data)
+        const userCheck = await User.findById(_id)
+        if(!userCheck){
+            io.to(id).emit("delete_chat_res", {msg: "Error user doesn't exist", status: false});
+            return console.log("Error user doesn't exist");
+        }
         const roomCheck= await Room.findById(room)
         if(!roomCheck){
             io.to(id).emit("send_msg_res", {msg: `Room ${room} doesn't exist`, status: false});

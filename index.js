@@ -8,6 +8,7 @@ const cors = require("cors")
 const {Server} = require('socket.io')
 const {signUp,logIn,logOut, deleteUser,getUsers,online } = require('./Controllers/userController');
 const {initRoom, sendMessage, readBy, deleteMsg, deleteChat} = require('./Controllers/roomController');
+const {initComplaint, getComplains} = require('./Controllers/complainsController');
 
 app.use(express.json())
 app.use(cors())
@@ -43,7 +44,9 @@ io.on("connect", (socket)=> {
     socket.on("delete_msg", data=> deleteMsg(data, io, socket.id));
     socket.on("delete_chat", data=> deleteChat(data, io, socket.id));
 
-    socket.on("log_user", ()=>console.log(user))
+    //Complains controller
+    socket.on("init_complain", data=> initComplaint(data, io, socket));
+    socket.on("get_complains", data=> getComplains(data, io, socket.id));
 
     socket.on("disconnect", ()=>{
         online({...user, online:false}, io, socket.id)

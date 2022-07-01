@@ -1,14 +1,15 @@
 
-require('./mongoDB');
+require('./config/mongoDB');
 
 const express = require('express')
 const app = express()
 const http = require('http')
 const cors = require("cors")
 const {Server} = require('socket.io')
-const {signUp,logIn,logOut, deleteUser,getUsers,online } = require('./Controllers/userController');
-const {initRoom, sendMessage, readBy, deleteMsg, deleteChat} = require('./Controllers/roomController');
-const {initComplaint, getComplains} = require('./Controllers/complainsController');
+const {online} = require('./api/controler/UserController');
+const {initRoom, sendMessage, readBy, deleteMsg, deleteChat} = require('./api/service/roomController');
+const {initComplaint, getComplains} = require('./api/service/ComplainsController');
+const {userRoute} = require('./api/routes/UserRoute');
 
 app.use(express.json())
 app.use(cors())
@@ -23,19 +24,11 @@ const io = new Server(server, {
 
 
 io.on("connect", (socket)=> {
-    console.log('id', socket.id)
     let user={};
-
+    userRoute(io,socket)
     //User controller
-    socket.on("sign_up", (data) => signUp(data, io, socket.id));
-    socket.on("log_in", data =>{
-        logIn(data,io, socket)
-        return user={email:data.email, password:data.password}
-    });
-    socket.on("log_out", () => logOut(io, socket));
-    socket.on("delete_user", data => deleteUser(data,io, socket));
-    socket.on("get_users", data=> getUsers(data, io, socket.id));
-    socket.on("online", data=> online(data, io, socket.id));
+     //controler
+    
 
     //Room controller
     socket.on("init_room", data=> initRoom(data, io, socket));
@@ -48,8 +41,8 @@ io.on("connect", (socket)=> {
     socket.on("init_complain", data=> initComplaint(data, io, socket));
     socket.on("get_complains", data=> getComplains(data, io, socket.id));
 
-    socket.on("disconnect", ()=>{
-        online({...user, online:false}, io, socket.id)
+    socket.on("disconnect", async ()=>{
+        await online({...user, online:false}, io, socket.id)
         console.log('disconnected', user)
     })
 })

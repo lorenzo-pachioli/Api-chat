@@ -90,7 +90,9 @@ module.exports.readBy = async (data, io, id)=>{
         const updateSend = {
             $addToSet:{"messages.$[].readBy": _id}
         };
+        
         const docRef =await Room.findByIdAndUpdate(room_id, updateSend, {new:true})
+        console.log(docRef.messages[docRef.messages.length - 50],docRef.messages[docRef.messages.length - 1])
        io.sockets.in(room_id).emit("read_msg_res", {room:docRef, status:true});
        return console.log("read_msg_res", room_id);
 

@@ -2,65 +2,150 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/User");
 const Room = require('../models/Room')
-
-async function alreadyExist(email){
-    const userCheck = await User.find({ email: email });
-    return userCheck ? userCheck[0]:false ;
+const { toEvent, brodcastEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils')
+const wrongEmail = {
+    msg: "Wrong email ",
+    status: false
 }
-function checkPassword(password, hashPassword, io, id){
-    if(!bcrypt.compareSync(password,  hashPassword)){
-        console.log('wrong pass')
-        io.to(id).emit("log_in_res", { msg: "Wrong password", status: false });
+const wrongPassword = {
+    msg: "Wrong password ",
+    status: false
+}
+
+async function alreadyExist(email, eventName) {
+    const userCheck = await User.findOne({ email: email });
+    if (!userCheck) {
+        toEvent(eventName, wrongEmail)
+        return false;
+    }
+    return userCheck;
+}
+
+function checkPassword(password, hashPassword, eventName) {
+    if (!bcrypt.compareSync(password, hashPassword)) {
+        toEvent(eventName, wrongPassword)
         return false
     }
     return true;
 }
 
-module.exports.singUp = async (firstName, lastName, email, password, io, id) => {
+module.exports.singUpService = async (firstName, lastName, email, password) => {
     try {
-        if(alreadyExist(email)) {
-            io.to(id).emit("sign_up_res", { msg: "Email already used", status: false });
-            return console.log(" no sign_up_res")
+        if (!alreadyExist(email, 'sign_up_res')) {
+            return false;
         }
         const salt = bcrypt.genSaltSync(saltRounds);
         const hash = bcrypt.hashSync(password.toString(), salt);
-        console.log('hash', hash)
         const newUser = User({
             firstName: firstName,
             lastName: lastName,
             email: email,
             password: hash,
-            online:false 
+            online: false
         });
         await newUser.save()
-        io.to(id).emit("sign_up_res", {status: true})
-        return console.log("sign_up_res")
-    } catch(err) {
-        err => io.to(id).emit("sign_up_res", {msg: "Error creating new user", status: false, error: err});
+        return toEvent("sign_up_res", { status: true })
+    } catch (err) {
+        err => toEvent("sign_up_res", { msg: "Error creating new user", status: false, error: err });
     }
 }
 
-module.exports.logIn = async (email, password, io, socket) => {
-    try{
-        const userCheck = await alreadyExist(email);
-        if(!userCheck) {
-            io.to(socket.id).emit("log_in_res", { msg: "Wrong email ", status: false });
+module.exports.logInService = async (email, password) => {
+    try {
+        const userCheck = await alreadyExist(email, "log_in_res");
+
+        if (!userCheck) {
             return console.log(" no log_in_res")
         }
-        if(!checkPassword(password, userCheck.password, io, socket.id)){
+        if (!checkPassword(password, userCheck.password, 'log_in_res')) {
             return console.log(" no log_in_res");
         }
-        
-        const docRef =await Room.find({users:{$all:userCheck._id.toString()}})
-        
-        docRef.map((room)=>{
-            socket.join(room._id.toString())
-        })
-        io.to(socket.id).emit("log_in_res", { status: true, user: userCheck, rooms: docRef});
-        return console.log("log_in_res 2");
-        
-    }catch(err){
-        io.to(socket.id).emit("log_in_res", { msg: "Error loging in", error:err, status: false });
-        return console.log("Error loging in",err);
+
+        const docRef = await Room.find({ users: { $all: userCheck._id.toString() } });
+        docRef.map((room) => joinRoom(room._id));
+
+        toEvent("log_in_res", { status: true, user: userCheck, rooms: docRef });
+        return console.log('log_in')
+
+    } catch (err) {
+        err => toEvent("log_in_res", { msg: "Error loging in", error: err, status: false });
+    }
+}
+
+module.exports.deleteUserService = async (email, password) => {
+    try {
+        const userCheck = await alreadyExist(email, "delete_user_res");
+        if (!userCheck) {
+            return false
+        }
+        if (!checkPassword(password, userCheck.password, "delete_user_res")) {
+            return false
+        }
+
+        const docRef = await User.findByIdAndDelete(userCheck._id, { password: 0 });
+        console.log('delete', docRef);
+        socketsEvent("delete_user_res", { msg: "User deleted", users: docRef, status: true });
+        return console.log('delete user')
+
+    } catch (err) {
+        err => toEvent("delete_user_res", { msg: "Error disconnecting", error: err, status: false });
+    }
+}
+
+module.exports.logOutService = async () => {
+    try {
+        disconnectSocket(true);
+    } catch (err) {
+        err => toEvent("log_out_res", { msg: "Error disconnecting", error: err, status: false });
+    }
+}
+
+module.exports.getUsersService = async (email, password, otherUser) => {
+    try {
+        const userCheck = await alreadyExist(email, "get_users_res");
+        if (!userCheck) {
+            return false
+        };
+        if (!checkPassword(password, userCheck.password, "get_users_res")) {
+            return false
+        };
+        if (otherUser) {
+            const docRef = await User.findById(otherUser, { password: 0 });
+            return toEvent("get_users_res", {
+                users: {
+                    _id: docRef._id,
+                    firstName: docRef.firstName,
+                    lastName: docRef.lastName,
+                    email: docRef.email,
+                    online: docRef.online
+                },
+                status: true
+            });
+        };
+        const docRef = await User.find({}, { password: 0 });
+        toEvent("get_users_res", { users: docRef, status: true });
+        return console.log('get_user');
+    } catch (err) {
+        err => toEvent("get_users_res", { msg: "Error geting users", error: err, status: false })
+    }
+}
+
+module.exports.onlineService = async (email, password, online) => {
+    try {
+        const userCheck = await alreadyExist(email, "online_res");
+        if (!userCheck) {
+            return false
+        }
+        if (!checkPassword(password, userCheck.password, "online_res")) {
+            return false
+        }
+        const update = {
+            online: online
+        }
+        const userOnline = await User.findByIdAndUpdate(userCheck._id, update, { new: true, password: 0 });
+        socketsEvent("online_res", { user: userOnline, status: true });
+        return console.log('online');
+    } catch (err) {
+        err => toEvent('online_res', { msg: "error changing to online", error: err, status: false });
     }
 }

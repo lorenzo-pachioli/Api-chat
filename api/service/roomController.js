@@ -40,21 +40,7 @@ module.exports.initRoom = async (data, io, socket)=>{
 module.exports.sendMessage = async (data, io, id)=>{
     try{
         const {_id, room, message} = data;
-        console.log(data)
-        const userCheck = await User.findById(_id)
-        if(!userCheck){
-            io.to(id).emit("delete_chat_res", {msg: "Error user doesn't exist", status: false});
-            return console.log("Error user doesn't exist");
-        }
-        const roomCheck= await Room.findById(room)
-        if(!roomCheck){
-            io.to(id).emit("send_msg_res", {msg: `Room ${room} doesn't exist`, status: false});
-            return console.log( `Room ${room} doesn't exist`)
-        }
-        if(!(roomCheck.users.some((user)=> user._id !== _id))){
-            io.to(id).emit("send_msg_res", {msg: "Must be part of the room to send message", status: false});
-            return console.log("Must be part of the room to send message")
-        }
+       
         const newMessage = Message({
             message: message,
             room: room,

@@ -12,8 +12,8 @@ module.exports.socketsEvent = (eventName, statusObj) => {
     myIo.sockets.emit(eventName, statusObj)
 }
 
-module.exports.socketsEvent = (id, eventName, statusObj) => {
-    myIo.sockets.in(id).emit(eventName, statusObj);
+module.exports.socketsInEvent = (id, eventName, statusObj) => {
+    myIo.sockets.in(id.toString()).emit(eventName, statusObj);
 }
 
 module.exports.initSocket = (io, socket) => {

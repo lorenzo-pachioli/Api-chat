@@ -2,11 +2,13 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/User");
 const Room = require('../models/Room')
-const { toEvent, brodcastEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils')
+const { toEvent, brodcastEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils');
+
 const wrongEmail = {
     msg: "Wrong email ",
     status: false
 }
+
 const wrongPassword = {
     msg: "Wrong password ",
     status: false
@@ -81,7 +83,7 @@ module.exports.deleteUserService = async (email, password) => {
         if (!checkPassword(password, userCheck.password, "delete_user_res")) {
             return false
         }
-
+        await Room.findAndDelete({users:{$all:userCheck._id.toString()}});
         const docRef = await User.findByIdAndDelete(userCheck._id, { password: 0 });
         console.log('delete', docRef);
         socketsEvent("delete_user_res", { msg: "User deleted", users: docRef, status: true });

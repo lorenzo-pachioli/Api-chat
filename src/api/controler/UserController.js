@@ -7,7 +7,7 @@ const {
     onlineService 
 } = require('../service/UserService');
 
-module.exports.signUp = (data) => {
+exports.signUp = (data) => {
     const { firstName, lastName, email, password } = data;
     /*
         vailidateInpuData = () => {
@@ -17,7 +17,7 @@ module.exports.signUp = (data) => {
     singUpService(firstName, lastName, email, password);
 }
 
-module.exports.logIn = (data) => {
+exports.logIn = (data) => {
     const { email, password } = data;
     /*
         vailidateInpuData = () => {
@@ -27,21 +27,21 @@ module.exports.logIn = (data) => {
     logInService(email, password);
 }
 
-module.exports.logOut = () => {
+exports.logOut = () => {
     logOutService();
 }
 
-module.exports.deleteUser = (data) => {
+exports.deleteUser = (data) => {
     const {email, password} = data;
     deleteUserService(email, password);
 }
 
-module.exports.getUsers = (data) => {
+exports.getUsers = (data) => {
     const {email, password, otherUser} = data; 
     getUsersService(email, password, otherUser);
 }
 
-module.exports.online = (data) => {
+exports.online = (data) => {
     const { email, password, online } = data;
     onlineService(email, password, online);
 }

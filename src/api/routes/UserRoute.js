@@ -7,7 +7,7 @@ const {
     online 
 } = require('../controler/UserController');
 
-module.exports.userRoute = (socket) => {
+exports.userRoute = (socket) => {
     console.log('id', socket.id);
     let user={};
 
@@ -23,7 +23,7 @@ module.exports.userRoute = (socket) => {
     socket.on("delete_user", data => deleteUser(data));
     socket.on("get_users", data=> getUsers(data));
     socket.on("online", data=> online(data)); 
-    socket.on("disconnect", async () => {
+    socket.on("disconnect", () => {
         online({...user, online:false});
         console.log('disconnected', user);
     });

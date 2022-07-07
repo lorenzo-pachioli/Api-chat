@@ -4,10 +4,10 @@ const userSchema = new Schema({
     firstName: String,
     lastName: String,
     email: String,
-    password: Number
-})
+    online: Boolean,
+    password: String
+});
 
-const User = model('User', userSchema)
+const User = model('User', userSchema);
 
 module.exports = User;
-

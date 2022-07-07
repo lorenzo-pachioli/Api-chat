@@ -32,10 +32,10 @@ exports.getComplainsService = async (email, password, _id) => {
     try {
         const userCheck = await alreadyExistByEmail(email, "get_complains_res");
         if (!userCheck) {
-            return console.log(" no log_in_res");
+            return console.log("get_complains_res");
         };
         if (!checkPassword(password, userCheck.password, "get_complains_res")) {
-            return console.log(" no log_in_res");
+            return console.log("get_complains_res");
         };
 
         const sentComplains = Report.find({ sender: { $all: _id } });

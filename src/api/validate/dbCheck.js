@@ -1,7 +1,6 @@
 const Room = require('../models/Room');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
 const {toEvent} = require('../helper/SocketUtils');
 
 const wrongEmail = {

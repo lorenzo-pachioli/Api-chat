@@ -1,6 +1,6 @@
 const {Schema, model} = require('mongoose');
 
-const complainSchema = new Schema({
+const reportSchema = new Schema({
     complain: String,
     sender: String,
     receiver: String,
@@ -8,6 +8,6 @@ const complainSchema = new Schema({
     url: String
 })
 
-const Complain = model('Complain', complainSchema);
+const Report = model('Report', reportSchema);
 
-module.exports = Complain;
+module.exports = Report;

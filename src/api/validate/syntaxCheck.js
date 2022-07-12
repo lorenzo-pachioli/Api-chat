@@ -54,7 +54,7 @@ exports.emailValidate = (email, eventName) => {
 exports.passwordValidate = (pass, eventName) => {
     const regExComplete = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&#.$($)$-$_])[A-Za-z\d$@$!%*?&#.$($)$-$_]{6,15}$/;
     const onlyNumbers = /^(.*\d){6,15}$/;
-
+    
     if (onlyNumbers.test(pass)) {
         return true;
     } else {

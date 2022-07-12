@@ -7,10 +7,8 @@ const { alreadyExistById, roomExistByUsersId } = require('../validate/dbCheck');
 
 exports.initRoomService = async (_id, otherUser) => {
     try {
-        if (!await alreadyExistById(_id, User, "init_room_res")) {
-            return false;
-        };
-        if (!await alreadyExistById(otherUser, User, "init_room_res")) {
+        if (!await alreadyExistById(_id, User, "init_room_res") &&
+            !await alreadyExistById(otherUser, User, "init_room_res")) {
             return false;
         };
 
@@ -20,15 +18,14 @@ exports.initRoomService = async (_id, otherUser) => {
                 readByService(_id, roomCheck._id);
             };
             joinRoom(roomCheck._id);
-            toEvent("init_room_res", { msg: `Joined to room ${roomCheck[0]._id}`, room: docRef, status: true });
+            toEvent("init_room_res", { room: docRef, status: true });
             return console.log(`Joined to room ${roomCheck._id}`);
         };
 
         const newRoom = roomModeling(_id, otherUser);
         const docRef = await newRoom.save();
         joinRoom(docRef._id);
-        socketsInEvent(docRef._id, "init_room_res", { room: docRef, status: true });
-        return console.log('room initiated');
+        socketsEvent("init_room_res", { room: docRef, otherUser: otherUser, status: true });
     } catch (err) {
         err => toEvent("init_room_res", { msg: 'Error initiating room', error: err, status: false });
     }
@@ -47,9 +44,20 @@ exports.sendMessageService = async (_id, room_id, message) => {
         const newMessage = messageModeling(_id, room_id, message);
         const roomUpdate = await Room.findByIdAndUpdate(room_id, { $addToSet: { messages: newMessage } }, { new: true });
         socketsInEvent(room_id, "send_msg_res", { room: roomUpdate, newMessage: newMessage, status: true });
-        return console.log(`msg sent to: ${roomUpdate._id}`);
     } catch (err) {
         err => toEvent("send_msg_res", { msg: "Error sending message", error: err, status: false });
+    }
+}
+exports.joinRoomService = async (_id, room_id) => {
+    try {
+        if (!await alreadyExistById(_id, User, "send_msg_res") &&
+            !await alreadyExistById(room_id, Room, "send_msg_res")) {
+            return false;
+        };
+
+        joinRoom(room_id);
+    } catch (err) {
+        err => toEvent("init_room_res", { msg: "Error joining room", error: err, status: false });
     }
 }
 
@@ -63,7 +71,6 @@ exports.readByService = async (_id, room_id) => {
         };
         const docRef = await Room.findByIdAndUpdate(room_id, { $addToSet: { "messages.$[].readBy": _id } }, { new: true });
         socketsInEvent(room_id, "read_msg_res", { room: docRef, status: true });
-        return console.log("read_msg_res", room_id);
     } catch (err) {
         err => toEvent("read_msg_res", { msg: "Error seting readBy", error: err, status: false });
     }
@@ -80,7 +87,6 @@ exports.deleteMsgService = async (_id, room_id, message_id) => {
 
         const docRef = await Room.findByIdAndUpdate(room_id, { $pull: { messages: { _id: new ObjectId(message_id) } } }, { new: true });
         socketsInEvent(room_id, "delete_msg_res", { room: docRef, status: true });
-        return console.log('deleted', docRef._id);
     } catch (err) {
         err => toEvent("delete_msg_res", { msg: "Error deleting message", error: err, status: false });
     }
@@ -97,7 +103,6 @@ exports.deleteChatService = async (_id, room_id) => {
 
         const docRef = await Room.findByIdAndDelete(room_id, { new: true })
         socketsInEvent(room_id, "delete_chat_res", { room: docRef, status: true });
-        return console.log(docRef)
     } catch (err) {
         err => toEvent("delete_chat_res", { msg: "Error deleting chat", error: err, status: false });
     }

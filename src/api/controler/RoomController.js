@@ -3,7 +3,8 @@ const {
     sendMessageService,
     readByService,
     deleteMsgService,
-    deleteChatService
+    deleteChatService, 
+    joinRoomService
 } = require('../service/RoomService');
 const { idValidate } = require('../validate/syntaxCheck');
 
@@ -26,6 +27,15 @@ exports.sendMessage = (data) => {
 
     sendMessageService(_id, room, message);
 };
+exports.joinRoom = (data) => {
+    const { _id, room_id } = data;
+
+    if (!idValidate(_id, "init_room_res") || !idValidate(room_id, "init_room_res")) {
+        return false;
+    };
+    
+    joinRoomService(_id, room_id);
+}
 
 exports.readBy = (data) => {
     const { _id, room_id } = data;

@@ -17,6 +17,10 @@ exports.socketsInEvent = (id, eventName, statusObj) => {
 }
 
 exports.initSocket = (io, socket) => {
+    socket.onAny(()=>{
+        myIo = io;
+        mySocket = socket;
+    });
     myIo = io;
     mySocket = socket;
 }

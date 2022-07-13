@@ -16,12 +16,13 @@ const io = new Server(server, {
         origin: "*"
     }
 });
-
+console.log('1');
 io.on("connect", (socket) => {
-    api(io, socket);
+    api(io, socket)
+    console.log('2');
 });
-
+console.log('3');
 const port = process.env.PORT || 3001;
-server.listen(port, () => {
+server.listen(port, (error) => {
     console.log('Connected');
 })

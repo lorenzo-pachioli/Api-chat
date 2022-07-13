@@ -26,7 +26,6 @@ exports.singUpService = async (firstName, lastName, email, password) => {
 }
 
 exports.logInService = async (email, password) => {
-    try {
         const userCheck = await alreadyExistByEmail(email, "log_in_res");
         if (!userCheck) {
             return console.log(" no log_in_res")
@@ -34,16 +33,14 @@ exports.logInService = async (email, password) => {
         if (!checkPassword(password, userCheck.password, 'log_in_res')) {
             return console.log(" no log_in_res");
         }
-
+        
+        throw new Error('Oppps!!');
         const docRef = await Room.find({ users: { $all: userCheck._id.toString() } });
         docRef.map((room) => {
             joinRoom(room._id)
         });
 
         toEvent("log_in_res", { status: true, user: userCheck, rooms: docRef });
-    } catch (err) {
-        err => toEvent("log_in_res", { msg: "Error loging in", error: err, status: false });
-    }
 }
 
 exports.deleteUserService = async (email, password) => {

@@ -1,4 +1,3 @@
-const { eventNames } = require('../models/User');
 const {
     singUpService,
     logInService,
@@ -22,7 +21,7 @@ exports.signUp = (data) => {
     singUpService(firstName, lastName, email, password);
 }
 
-exports.logIn = (data) => {
+exports.logIn = async (data) => {
     const { email, password, online } = data;
 
     if (!emailValidate(email, 'log_in_res') || !passwordValidate(password, 'log_in_res')) {
@@ -31,10 +30,10 @@ exports.logIn = (data) => {
     if (!booleanValidate(online, "online_res")) {
         return false;
     };
-
-    logInService(email, password);
-    getUsersService(email, password);
-    onlineService(email, password, online);
+    
+    await logInService(email, password);
+    await getUsersService(email, password);
+    await onlineService(email, password, online);
 }
 
 exports.logOut = () => {

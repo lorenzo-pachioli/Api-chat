@@ -3,66 +3,62 @@ const {
     sendMessageService,
     readByService,
     deleteMsgService,
-    deleteChatService, 
+    deleteChatService,
     joinRoomService
 } = require('../service/RoomService');
 const { idValidate } = require('../validate/syntaxCheck');
 
-exports.initRoom = (data) => {
+exports.initRoom = async (data) => {
     const { _id, otherUser } = data;
 
-    if (!idValidate(_id, "init_room_res") || !idValidate(otherUser, "init_room_res")) {
-        return false;
-    };
+    idValidate(_id, "init_room_res");
+    idValidate(otherUser, "init_room_res");
 
-    initRoomService(_id, otherUser);
+    await initRoomService(_id, otherUser);
 };
 
-exports.sendMessage = (data) => {
+exports.sendMessage = async (data) => {
     const { _id, room, message } = data;
 
-    if (!idValidate(_id, "send_msg_res") || !idValidate(room, "send_msg_res")) {
-        return false;
-    };
+    idValidate(_id, "send_msg_res");
+    idValidate(room, "send_msg_res");
 
-    sendMessageService(_id, room, message);
+    await sendMessageService(_id, room, message);
 };
-exports.joinRoom = (data) => {
+
+exports.joinRoom = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "init_room_res") || !idValidate(room_id, "init_room_res")) {
-        return false;
-    };
-    
-    joinRoomService(_id, room_id);
+    idValidate(_id, "init_room_res");
+    idValidate(room_id, "init_room_res");
+
+    await joinRoomService(_id, room_id);
 }
 
-exports.readBy = (data) => {
+exports.readBy = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "read_msg_res") || !idValidate(room_id, "read_msg_res")) {
-        return false;
-    };
+    idValidate(_id, "read_msg_res");
+    idValidate(room_id, "read_msg_res");
 
-    readByService(_id, room_id);
+    await readByService(_id, room_id);
 };
 
-exports.deleteMsg = (data) => {
+exports.deleteMsg = async (data) => {
     const { _id, room_id, message_id } = data;
 
-    if (!idValidate(_id, "delete_msg_res") || !idValidate(room_id, "delete_msg_res") || !idValidate(message_id, "delete_msg_res")) {
-        return false;
-    };
+    idValidate(_id, "delete_msg_res");
+    idValidate(room_id, "delete_msg_res");
+    idValidate(message_id, "delete_msg_res");
 
-    deleteMsgService(_id, room_id, message_id);
+    await deleteMsgService(_id, room_id, message_id);
 };
 
-exports.deleteChat = (data) => {
+exports.deleteChat = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "read_msg_res") || !idValidate(room_id, "read_msg_res")) {
-        return false;
-    };
+    idValidate(_id, "read_msg_res");
+    idValidate(room_id, "read_msg_res");
 
-    deleteChatService(_id, room_id);
+    await deleteChatService(_id, room_id);
 };

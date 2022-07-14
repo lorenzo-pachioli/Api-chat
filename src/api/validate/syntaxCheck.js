@@ -1,29 +1,24 @@
 const { ObjectId } = require('mongodb');
-const { toEvent } = require('../helper/SocketUtils');
 
-exports.idValidate = (id, eventName) => {
+exports.idValidate = (id) => {
 
     if (!ObjectId(id).getTimestamp()) {
-        toEvent(eventName, { msg: "Incorrect id form", status: false });
-        return false;
+        throw new Error("Incorrect id form");
     };
     return true;
 }
 
-exports.nameValidate = (name, eventName) => {
+exports.nameValidate = (name) => {
     const regExName = /^([A-ZÁÉÍÓÚ]{1}[a-zñáéíóú]+[\s]*)+$/;
 
     if (name.length >= 18) {
-        toEvent(eventName, { msg: "name introduce is too long", status: false });
-        return false;
+        throw new Error("name introduce is too long");
     }
     if (name.length <= 3) {
-        toEvent(eventName, { msg: "name introduce is too short", status: false });
-        return false;
+        throw new Error("name introduce is too short");
     }
     if (!regExName.test(name)) {
-        toEvent(eventName, { msg: "Incorrect name form", status: false });
-        return false;
+        throw new Error("Incorrect name form");
     }
     return true;
     /* 
@@ -35,12 +30,11 @@ exports.nameValidate = (name, eventName) => {
     */
 }
 
-exports.emailValidate = (email, eventName) => {
+exports.emailValidate = (email) => {
     const regExEmail = /^[-\w.%+]{1,30}@(?:[A-Z0-9-]{4,30}\.)[A-Z]{2,20}$/i;
 
     if (!regExEmail.test(email)) {
-        toEvent(eventName, { msg: "Incorrect email form", status: false });
-        return false;
+        throw new Error("Incorrect email form");
     };
     return true;
     /* 
@@ -51,15 +45,14 @@ exports.emailValidate = (email, eventName) => {
     */
 }
 
-exports.passwordValidate = (pass, eventName) => {
+exports.passwordValidate = (pass) => {
     const regExComplete = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[$@$!%*?&#.$($)$-$_])[A-Za-z\d$@$!%*?&#.$($)$-$_]{6,15}$/;
     const onlyNumbers = /^(.*\d){6,15}$/;
     
     if (onlyNumbers.test(pass)) {
         return true;
     } else {
-        toEvent(eventName, { msg: "Incorrect password form", status: false });
-        return false;
+        throw new Error("Incorrect password form");
     }
     /* regExComplete : 
                         - Minimo 8 caracteres
@@ -72,10 +65,9 @@ exports.passwordValidate = (pass, eventName) => {
     */
 }
 
-exports.booleanValidate = (boolean, eventName) => {
+exports.booleanValidate = (boolean) => {
     if (boolean === true || boolean === false) {
         return true;
-    }
-    toEvent(eventName, { msg: "Incorrect online form", status: false });
-    return false;
+    };
+    throw new Error("Incorrect online form");
 }

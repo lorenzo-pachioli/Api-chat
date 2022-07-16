@@ -6,6 +6,7 @@ const http = require('http');
 const cors = require("cors");
 const { Server } = require('socket.io');
 const {api} = require('./api/index');
+const {userValidationMiddleware, roomValidationMiddleware} = require('./api/middleware/inputValidation');
 app.use(express.json());
 app.use(cors());
 
@@ -16,12 +17,18 @@ const io = new Server(server, {
         origin: "*"
     }
 });
-console.log('1');
+
+/* io.use((socket, next) => {
+    console.log(socket);
+    next();
+}); */
+
 io.on("connect", (socket) => {
-    api(io, socket)
-    console.log('2');
+    userValidationMiddleware(socket);
+    roomValidationMiddleware(socket);
+    api(io, socket);
 });
-console.log('3');
+
 const port = process.env.PORT || 3001;
 server.listen(port, (error) => {
     console.log('Connected');

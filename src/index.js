@@ -17,21 +17,9 @@ const io = new Server(server, {
         origin: "*"
     }
 });
-console.log('1');
+
 io.on("connect", (socket) => {
     api(io, socket)
-    console.log('2');
-});
-
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled Rejection at:', promise, 'reason:', reason );
-    toEvent(`log_in_res`, { msg: `Unhandled Rejection at: ${reason}`, status: false });
-});
-
-process.on('uncaughtException', (err, origin) => {
-    console.log(`Caught exception: ${err}`, ` origin: ${ origin}`);
-    toEvent(`log_in_res`, { msg: `Caught exception: ${err}`, status: false });
 });
 
 const port = process.env.PORT || 3001;

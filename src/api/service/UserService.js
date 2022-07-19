@@ -17,6 +17,7 @@ exports.singUpService = async (firstName, lastName, email, password) => {
     await newUser.save();
 
     toEvent("sign_up_res", { status: true });
+    return true;
 }
 
 exports.logInService = async (email, password) => {

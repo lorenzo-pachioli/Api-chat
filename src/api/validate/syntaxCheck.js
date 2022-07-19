@@ -1,24 +1,20 @@
 const { ObjectId } = require('mongodb');
 
 exports.idValidate = (id) => {
-    if (!ObjectId.isValid(id)) return false;
-        /* throw new Error("Incorrect id form"); */
-    return true;
+    if (ObjectId.isValid(id)) return true;
+    return false;
 }
 
 exports.nameValidate = (name) => {
     const regExName = /^([A-ZÁÉÍÓÚ]{1}[a-zñáéíóú]+[\s]*)+$/;
     if (name === undefined) return false;
     if (name.length >= 18) {
-        /* throw new Error("name introduce is too long"); */
         return false;
     }
     if (name.length <= 3) {
-        /* throw new Error("name introduce is too short"); */
         return false;
     }
     if (!regExName.test(name)) {
-        /* throw new Error("Incorrect name form"); */
         return false;
     }
     return true;
@@ -35,7 +31,6 @@ exports.emailValidate = (email) => {
     const regExEmail = /^[-\w.%+]{1,30}@(?:[A-Z0-9-]{4,30}\.)[A-Z]{2,20}$/i;
     
     if (!regExEmail.test(email)) {
-        /* throw new Error("Incorrect email form"); */
         return false;
     };
     if (typeof email !== 'string') return false;
@@ -57,7 +52,6 @@ exports.passwordValidate = (pass) => {
     if (onlyNumbers.test(pass)) {
         return true;
     }
-    /* throw new Error("Incorrect password form"); */
     return false;
     
     /* regExComplete : 
@@ -75,6 +69,5 @@ exports.booleanValidate = (boolean) => {
     if (boolean === true || boolean === false) {
         return true;
     };
-    /* throw new Error("Incorrect online form"); */
     return false;
 }

@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const User = require("../models/User");
 const Room = require('../models/Room');
-const { toEvent, brodcastEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils');
+const { toEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils');
 const { userModeling } = require('../helper/ModelUtils');
 const { alreadyExistByEmail, checkPassword } = require('../validate/dbCheck');
 const Report = require('../models/Report');
@@ -17,7 +17,6 @@ exports.singUpService = async (firstName, lastName, email, password) => {
     await newUser.save();
 
     toEvent("sign_up_res", { status: true });
-    return true;
 }
 
 exports.logInService = async (email, password) => {
@@ -40,7 +39,7 @@ exports.deleteUserService = async (email, password) => {
     if (!userCheck) throw new Error("Email used doesn't exist");
     if (!checkPassword(password, userCheck.password)) throw new Error("Wrong password");
 
-    await Room.deleteMany({ users: { $all: [userCheck._id.toString()] } }, { new: true });
+    await Room.deleteMany({ users: { $all: [userCheck._id.toString()] } });
     await Report.deleteMany({ sender: { $all: userCheck._id.toString() }, receiver: { $all: userCheck._id.toString() } });
     const docRef = await User.findByIdAndDelete(userCheck._id, { password: 0 });
     const newRooms = await Room.find({ users: { $all: userCheck._id.toString() } });

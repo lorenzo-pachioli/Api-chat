@@ -35,18 +35,13 @@ exports.nameTestCases = [
         expected: true
     },
     {
-        description: 'three names, one invalid',
-        value: 'Jhon dow Sherald',
-        expected: false
-    },
-    {
         description: 'too short',
         value: 'Jo',
         expected: false
     },
     {
         description: 'too long',
-        value: 'Jhonnnn Dowwwww Sherald',
+        value: 'Jhonnnnnnnnnnnnnnnn',
         expected: false
     },
     {
@@ -66,7 +61,7 @@ exports.nameTestCases = [
     },
     {
         description: 'Null',
-        value: '',
+        value: ' ',
         expected: false
     },
     {

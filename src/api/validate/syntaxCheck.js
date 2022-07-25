@@ -8,10 +8,10 @@ exports.idValidate = (id) => {
 exports.nameValidate = (name) => {
     const regExName = /^([A-ZÁÉÍÓÚ]{1}[a-zñáéíóú]+[\s]*)+$/;
     if (name === undefined) return false;
-    if (name.length >= 18) {
+    if (name.length > 18) {
         return false;
     }
-    if (name.length <= 3) {
+    if (name.length < 3) {
         return false;
     }
     if (!regExName.test(name)) {

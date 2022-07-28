@@ -8,7 +8,8 @@
     "start": "cross-env NODE_ENV=production node src/index.js",
     "test": "cross-env NODE_ENV=test jest --verbose",
     "test:syntax": "npm test -- --testPathPattern syntaxCheck",
-    "test:user": "npm test -- --testPathPattern UserService"
+    "test:user": "npm test -- --testPathPattern UserService", 
+    "test:room": "npm test -- --testPathPattern RoomService"
   },
   "keywords": [],
   "author": "",

@@ -15,7 +15,7 @@ exports.initRoomService = async (_id, otherUser) => {
 			readByService(_id, roomCheck._id);
 		};
 		joinRoom(roomCheck._id);
-		toEvent("init_room_res", { room: docRef, status: true });
+		toEvent("init_room_res", { room: roomCheck, status: true });
 		return console.log(`Joined to room ${roomCheck._id}`);
 	};
 	const newRoom = roomModeling(_id, otherUser);

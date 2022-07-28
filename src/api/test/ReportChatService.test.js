@@ -40,6 +40,7 @@ const room = {
 };
 
 const newReport = {
+    _id: "507f1f77bcf96cd7994388da",
     complain: 'Some complain',
     sender: newUser._id,
     receiver: otherUser._id,
@@ -102,10 +103,10 @@ describe('ReportChatService', () => {
 
     describe('getComplainsService', () => {
 
-        test('should return status true, set and recive complains', () => {
+        test('should return status true, set and recive complains', (done) => {
             const hashedPass = bcrypt.hashSync(newUser.password, 10);
             mockingoose(User).toReturn({ ...newUser, password: hashedPass }, 'findOne');
-            mockingoose(Report).toReturn([newReport], 'find');
+            mockingoose(Report).toReturn([newReport]);
 
             errorCatch(getComplainsService(newUser.email, newUser.password), "get_complains")
 

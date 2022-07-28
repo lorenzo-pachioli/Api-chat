@@ -9,7 +9,8 @@
     "test": "cross-env NODE_ENV=test jest --verbose",
     "test:syntax": "npm test -- --testPathPattern syntaxCheck",
     "test:user": "npm test -- --testPathPattern UserService", 
-    "test:room": "npm test -- --testPathPattern RoomService"
+    "test:room": "npm test -- --testPathPattern RoomService",
+    "test:report": "npm test -- --testPathPattern ReportChatService"
   },
   "keywords": [],
   "author": "",

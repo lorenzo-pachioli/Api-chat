@@ -5,8 +5,8 @@ const app = express();
 const http = require('http');
 const cors = require("cors");
 const { Server } = require('socket.io');
-const {api} = require('./api/index');
-const {toEvent} = require('./api/helper/SocketUtils');
+const { api } = require('./api/index');
+const { toEvent } = require('./api/helper/SocketUtils');
 app.use(express.json());
 app.use(cors());
 
@@ -17,24 +17,23 @@ const io = new Server(server, {
         origin: "*"
     }
 });
-console.log('1');
+
 io.on("connect", (socket) => {
-    api(io, socket)
-    console.log('2');
+    api(io, socket);
 });
 
 
-process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled Rejection at:', promise, 'reason:', reason );
-    toEvent(`log_in_res`, { msg: `Unhandled Rejection at: ${reason}`, status: false });
+process.on('unhandledRejection', (err) => {
+    console.log('Unhandled Rejection at:', err );
+    toEvent('', { msg: `Unhandled Rejection: ${err}`, status: false });
 });
 
 process.on('uncaughtException', (err, origin) => {
-    console.log(`Caught exception: ${err}`, ` origin: ${ origin}`);
-    toEvent(`log_in_res`, { msg: `Caught exception: ${err}`, status: false });
+    console.log(`Caught exception: ${err}`, ` origin: ${origin}`);
+    toEvent('', { msg: `Caught exception: ${err}`, at: origin, status: false });
 });
 
 const port = process.env.PORT || 3001;
-server.listen(port, (error) => {
+server.listen(port, () => {
     console.log('Connected');
 })

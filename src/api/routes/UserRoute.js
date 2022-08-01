@@ -1,31 +1,33 @@
-const { 
-    signUp, 
+const {
+    signUp,
     logIn,
-    logOut, 
+    logOut,
     deleteUser,
     getUsers,
-    online 
+    online
 } = require('../controler/UserController');
-const {errorCatch} = require('../helper/ErrorsUtils'); 
+const { errorCatch } = require('../helper/ErrorsUtils');
 
-exports.userRoute =  (socket) => {
+exports.userRoute = (socket) => {
     console.log('id', socket.id);
-    let user={};
+    let user = {};
 
-    socket.on("sign_up", data => errorCatch(signUp(data)));
+    socket.on("sign_up", data => errorCatch(signUp(data), "sign_up"));
     socket.on("log_in", data => {
-        errorCatch(logIn(data), "log_in")
+        errorCatch(logIn(data), "log_in");
         return user = {
-            email: data.email, 
+            email: data.email,
             password: data.password
         };
     });
     socket.on("log_out", () => logOut());
-    socket.on("delete_user", data => errorCatch(deleteUser(data)));
-    socket.on("get_users", data=> errorCatch(getUsers(data)));
-    socket.on("online", data=> errorCatch(online(data))); 
+    socket.on("delete_user", data => errorCatch(deleteUser(data), "delete_user"));
+    socket.on("get_users", data => errorCatch(getUsers(data), "get_users"));
+    socket.on("online", data => errorCatch(online(data), "online"));
     socket.on("disconnect", () => {
-        errorCatch(online({...user, online:false}));
+        if (socket.connected) {
+            errorCatch(online({ ...user, online: false }), "online");
+        }
         console.log('disconnected', user);
     });
 }

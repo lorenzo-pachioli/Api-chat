@@ -1,9 +1,12 @@
-var mySocket = {};
-var myIo = {};
+let mySocket = {};
+let myIo = {};
+let event = '';
 
 exports.toEvent = (eventName, statusObj) => {
-    if (!eventName) throw new Error('No event name recive');
-    myIo.to(mySocket.id).emit(eventName, statusObj ? statusObj:'');
+    if (eventName) {
+        myIo.to(mySocket.id).emit(eventName, statusObj);
+    }
+    myIo.to(mySocket.id).emit(`${event}_res`, statusObj);
 }
 
 exports.socketsEvent = (eventName, statusObj) => {
@@ -17,9 +20,10 @@ exports.socketsInEvent = (id, eventName, statusObj) => {
 }
 
 exports.initSocket = (io, socket) => {
-    socket.onAny(()=>{
+    socket.prependAny((eventName)=>{
         myIo = io;
         mySocket = socket;
+        event = eventName;
     });
     myIo = io;
     mySocket = socket;

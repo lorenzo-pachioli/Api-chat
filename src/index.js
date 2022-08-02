@@ -5,7 +5,8 @@ const app = express();
 const http = require('http');
 const cors = require("cors");
 const { Server } = require('socket.io');
-const {api} = require('./api/index');
+const { api } = require('./api/index');
+const { toEvent } = require('./api/helper/SocketUtils');
 app.use(express.json());
 app.use(cors());
 
@@ -23,7 +24,7 @@ io.on("connect", (socket) => {
 
 
 process.on('unhandledRejection', (err) => {
-    console.log('Unhandled Rejection at:', err );
+    console.log('Unhandled Rejection at:', err);
     toEvent('', { msg: `Unhandled Rejection: ${err}`, status: false });
 });
 

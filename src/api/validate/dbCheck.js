@@ -20,8 +20,8 @@ function checkPassword(password, hashPassword) {
 };
 
 async function roomExistByUsersId(_id, otherUser) {
-    const roomCheck = await Room.findOne({ users: { $all: [_id.toString(), otherUser.toString()] } });
-    if (!roomCheck) return roomCheck;
+    const roomCheck = await Room.find({ users: { $all: [_id.toString(), otherUser.toString()] } });
+    if (roomCheck) return roomCheck;
     return false;
 };
 

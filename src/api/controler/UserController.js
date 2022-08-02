@@ -11,10 +11,10 @@ const { idValidate, nameValidate, emailValidate, passwordValidate, booleanValida
 exports.signUp = async (data) => {
     const { firstName, lastName, email, password } = data;
 
-    nameValidate(firstName, 'log_in_res');
-    nameValidate(lastName, 'log_in_res');
-    emailValidate(email, 'log_in_res');
-    passwordValidate(password, 'log_in_res');
+    if (nameValidate(firstName, 'log_in_res')) throw new Error("Incorrect firstName form");
+    if (nameValidate(lastName, 'log_in_res')) throw new Error("Incorrect lastName form");
+    if (emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
+    if (passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
 
     await singUpService(firstName, lastName, email, password);
 }
@@ -22,10 +22,10 @@ exports.signUp = async (data) => {
 exports.logIn = async (data) => {
     const { email, password, online } = data;
 
-    passwordValidate(password, 'log_in_res');
-    emailValidate(email, 'log_in_res');
-    booleanValidate(online, "online_res");
-    
+    if (emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
+    if (passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
+    if (booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
+
     await logInService(email, password);
     await getUsersService(email, password);
     await onlineService(email, password, online);
@@ -38,8 +38,8 @@ exports.logOut = () => {
 exports.deleteUser = async (data) => {
     const { email, password } = data;
 
-    emailValidate(email, "delete_user_res");
-    passwordValidate(password, "delete_user_res");
+    if (!emailValidate(email, "delete_user_res")) throw new Error("Incorrect email form");
+    if (!passwordValidate(password, "delete_user_res")) throw new Error("Incorrect password form");
 
     await deleteUserService(email, password);
 }
@@ -47,9 +47,9 @@ exports.deleteUser = async (data) => {
 exports.getUsers = async (data) => {
     const { email, password, otherUser } = data;
 
-    emailValidate(email, "get_users_res");
-    passwordValidate(password, "get_users_res"); 
-    idValidate(otherUser, "get_users_res");
+    if (!emailValidate(email, "get_users_res")) throw new Error("Incorrect email form");
+    if (!passwordValidate(password, "get_users_res")) throw new Error("Incorrect password form");
+    if (!idValidate(otherUser, "get_users_res")) throw new Error("Incorrect id form");
 
     await getUsersService(email, password, otherUser);
 }
@@ -57,9 +57,9 @@ exports.getUsers = async (data) => {
 exports.online = async (data) => {
     const { email, password, online } = data;
 
-    emailValidate(email, "online_res"); 
-    passwordValidate(password, "online_res"); 
-    booleanValidate(online, "online_res");
+    if (!emailValidate(email, "online_res")) throw new Error("Incorrect email form");
+    if (!passwordValidate(password, "online_res")) throw new Error("Incorrect password form");
+    if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
 
     await onlineService(email, password, online);
 }

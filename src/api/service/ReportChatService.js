@@ -16,13 +16,13 @@ exports.initReportService = async (sender, receiver, room_id, complain, url) => 
     toEvent("init_report_res", { complain: docRef, status: true });
 }
 
-exports.getComplainsService = async (email, password, _id) => {
+exports.getComplainsService = async (email, password) => {
     const userCheck = await alreadyExistByEmail(email);
     if (!userCheck) throw new Error("Must be registered to get chat reports");
     if (!checkPassword(password, userCheck.password)) throw new Error("Wrong password");
 
-    const sentComplains = Report.find({ sender: { $all: _id } });
-    const recieveComplains = Report.find({ receiver: { $all: _id } });
+    const sentComplains = await Report.find({ sender: { $all: userCheck._id } });
+    const recieveComplains = await Report.find({ receiver: { $all: userCheck._id } });
 
     toEvent("get_complains_res", { sent: sentComplains, receive: recieveComplains, status: true })
 }

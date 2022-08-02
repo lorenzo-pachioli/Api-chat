@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 
 exports.userModeling = (firstName, lastName, email, hash) => {
+    if (!firstName || !lastName || !email || !hash) return false;
     const newUser = User({
         firstName: firstName,
         lastName: lastName,
@@ -15,6 +16,7 @@ exports.userModeling = (firstName, lastName, email, hash) => {
 }
 
 exports.roomModeling = (_id, otherUser) => {
+    if (!_id || !otherUser) return false;
     const newRoom = Room({
         messages: [],
         users: [_id, otherUser]
@@ -23,6 +25,7 @@ exports.roomModeling = (_id, otherUser) => {
 }
 
 exports.messageModeling = (_id, room_id, message) => {
+    if (!_id || !room_id || !message) return false;
     const newMessage = Message({
         message: message,
         room: room_id,
@@ -34,6 +37,7 @@ exports.messageModeling = (_id, room_id, message) => {
 }
 
 exports.reportModeling = (sender, receiver, room_id, complain, url) => {
+    if (!sender || !receiver || !room_id || !complain || !url) return false;
     const newReport = Report({
         complain: complain,
         sender: sender,

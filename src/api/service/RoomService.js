@@ -1,6 +1,6 @@
 const Room = require('../models/Room');
 const User = require("../models/User");
-const { toEvent, brodcastEvent, joinRoom, socketsEvent, socketsInEvent } = require('../helper/SocketUtils');
+const { toEvent, joinRoom, socketsEvent, socketsInEvent } = require('../helper/SocketUtils');
 const { ObjectId } = require('mongodb');
 const { roomModeling, messageModeling } = require('../helper/ModelUtils');
 const { alreadyExistById, roomExistByUsersId } = require('../validate/dbCheck');
@@ -15,7 +15,7 @@ exports.initRoomService = async (_id, otherUser) => {
 			readByService(_id, roomCheck._id);
 		};
 		joinRoom(roomCheck._id);
-		toEvent("init_room_res", { room: docRef, status: true });
+		toEvent("init_room_res", { room: roomCheck, status: true });
 		return console.log(`Joined to room ${roomCheck._id}`);
 	};
 	const newRoom = roomModeling(_id, otherUser);

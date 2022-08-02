@@ -1,109 +1,70 @@
 const Room = require('../models/Room');
 const User = require("../models/User");
-const { toEvent, brodcastEvent, disconnectSocket, joinRoom, socketsEvent, socketsInEvent } = require('../helper/SocketUtils');
+const { toEvent, brodcastEvent, joinRoom, socketsEvent, socketsInEvent } = require('../helper/SocketUtils');
 const { ObjectId } = require('mongodb');
 const { roomModeling, messageModeling } = require('../helper/ModelUtils');
 const { alreadyExistById, roomExistByUsersId } = require('../validate/dbCheck');
 
 exports.initRoomService = async (_id, otherUser) => {
-    try {
-        if (!await alreadyExistById(_id, User, "init_room_res") &&
-            !await alreadyExistById(otherUser, User, "init_room_res")) {
-            return false;
-        };
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to init chat");
+	if (!await alreadyExistById(otherUser, User)) throw new Error("The user you want to initiate a chat with doesn't exist");
+	const roomCheck = await roomExistByUsersId(_id, otherUser);
 
-        const roomCheck = await roomExistByUsersId(_id, otherUser);
-        if (roomCheck) {
-            if (roomCheck.messages.length > 0) {
-                readByService(_id, roomCheck._id);
-            };
-            joinRoom(roomCheck._id);
-            toEvent("init_room_res", { room: docRef, status: true });
-            return console.log(`Joined to room ${roomCheck._id}`);
-        };
+	if (roomCheck) {
+		if (roomCheck.messages.length > 0) {
+			readByService(_id, roomCheck._id);
+		};
+		joinRoom(roomCheck._id);
+		toEvent("init_room_res", { room: docRef, status: true });
+		return console.log(`Joined to room ${roomCheck._id}`);
+	};
+	const newRoom = roomModeling(_id, otherUser);
+	const docRef = await newRoom.save();
+	joinRoom(docRef._id);
 
-        const newRoom = roomModeling(_id, otherUser);
-        const docRef = await newRoom.save();
-        joinRoom(docRef._id);
-        socketsEvent("init_room_res", { room: docRef, otherUser: otherUser, status: true });
-    } catch (err) {
-        err => toEvent("init_room_res", { msg: 'Error initiating room', error: err, status: false });
-    }
+	socketsEvent("init_room_res", { room: docRef, otherUser: otherUser, status: true });
 }
 
 exports.sendMessageService = async (_id, room_id, message) => {
-    try {
-        if (!await alreadyExistById(_id, User, "send_msg_res")) {
-            return false;
-        };
-        const roomCheck = await alreadyExistById(room_id, Room, "send_msg_res");
-        if (!roomCheck) {
-            return false;
-        };
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to send a message");
+	if (!await alreadyExistById(room_id, Room)) throw new Error("The chat you're sending a message doesn't exist");
 
-        const newMessage = messageModeling(_id, room_id, message);
-        const roomUpdate = await Room.findByIdAndUpdate(room_id, { $addToSet: { messages: newMessage } }, { new: true });
-        socketsInEvent(room_id, "send_msg_res", { room: roomUpdate, newMessage: newMessage, status: true });
-    } catch (err) {
-        err => toEvent("send_msg_res", { msg: "Error sending message", error: err, status: false });
-    }
+	const newMessage = messageModeling(_id, room_id, message);
+	const roomUpdate = await Room.findByIdAndUpdate(room_id, { $addToSet: { messages: newMessage } }, { new: true });
+
+	socketsInEvent(room_id, "send_msg_res", { room: roomUpdate, newMessage: newMessage, status: true });
 }
-exports.joinRoomService = async (_id, room_id) => {
-    try {
-        if (!await alreadyExistById(_id, User, "send_msg_res") &&
-            !await alreadyExistById(room_id, Room, "send_msg_res")) {
-            return false;
-        };
 
-        joinRoom(room_id);
-    } catch (err) {
-        err => toEvent("init_room_res", { msg: "Error joining room", error: err, status: false });
-    }
+exports.joinRoomService = async (_id, room_id) => {
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to join chat");
+	if (!await alreadyExistById(room_id, Room)) throw new Error("The chat you're joining doesn't exist");
+
+	joinRoom(room_id);
 }
 
 exports.readByService = async (_id, room_id) => {
-    try {
-        if (!await alreadyExistById(_id, User, "read_msg_res")) {
-            return false;
-        };
-        if (!await alreadyExistById(room_id, Room, "read_msg_res")) {
-            return false;
-        };
-        const docRef = await Room.findByIdAndUpdate(room_id, { $addToSet: { "messages.$[].readBy": _id } }, { new: true });
-        socketsInEvent(room_id, "read_msg_res", { room: docRef, status: true });
-    } catch (err) {
-        err => toEvent("read_msg_res", { msg: "Error seting readBy", error: err, status: false });
-    }
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to set messages as read");
+	if (!await alreadyExistById(room_id, Room)) throw new Error("The chat you want to mark as read doesn't exist");
+
+	const docRef = await Room.findByIdAndUpdate(room_id, { $addToSet: { "messages.$[].readBy": _id } }, { new: true });
+
+	socketsInEvent(room_id, "read_msg_res", { room: docRef, status: true });
 }
 
 exports.deleteMsgService = async (_id, room_id, message_id) => {
-    try {
-        if (!await alreadyExistById(_id, User, "delete_msg_res")) {
-            return false;
-        };
-        if (!await alreadyExistById(room_id, Room, "delete_msg_res")) {
-            return false;
-        };
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to delete messages");
+	if (!await alreadyExistById(room_id, Room)) throw new Error("The chat you want to delete messages from doesn't exist");
 
-        const docRef = await Room.findByIdAndUpdate(room_id, { $pull: { messages: { _id: new ObjectId(message_id) } } }, { new: true });
-        socketsInEvent(room_id, "delete_msg_res", { room: docRef, status: true });
-    } catch (err) {
-        err => toEvent("delete_msg_res", { msg: "Error deleting message", error: err, status: false });
-    }
+	const docRef = await Room.findByIdAndUpdate(room_id, { $pull: { messages: { _id: new ObjectId(message_id) } } }, { new: true });
+
+	socketsInEvent(room_id, "delete_msg_res", { room: docRef, status: true });
 }
 
 exports.deleteChatService = async (_id, room_id) => {
-    try {
-        if (!await alreadyExistById(_id, User, "delete_chat_res")) {
-            return false;
-        };
-        if (!await alreadyExistById(room_id, Room, "delete_chat_res")) {
-            return false;
-        };
+	if (!await alreadyExistById(_id, User)) throw new Error("Must be registered to delete a chat");
+	if (!await alreadyExistById(room_id, Room)) throw new Error("The chat you want to delete doesn't exist");
 
-        const docRef = await Room.findByIdAndDelete(room_id, { new: true })
-        socketsInEvent(room_id, "delete_chat_res", { room: docRef, status: true });
-    } catch (err) {
-        err => toEvent("delete_chat_res", { msg: "Error deleting chat", error: err, status: false });
-    }
+	const docRef = await Room.findByIdAndDelete(room_id, { new: true });
+
+	socketsInEvent(room_id, "delete_chat_res", { room: docRef, status: true });
 }

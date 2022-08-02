@@ -1,4 +1,3 @@
-const { eventNames } = require('../models/User');
 const {
     singUpService,
     logInService,
@@ -9,72 +8,60 @@ const {
 } = require('../service/UserService');
 const { idValidate, nameValidate, emailValidate, passwordValidate, booleanValidate } = require('../validate/syntaxCheck');
 
-exports.signUp = (data) => {
+exports.signUp = async (data) => {
     const { firstName, lastName, email, password } = data;
 
-    if (!nameValidate(firstName, 'log_in_res') || !nameValidate(lastName, 'log_in_res')) {
-        return false;
-    };
-    if (!emailValidate(email, 'log_in_res') || !passwordValidate(password, 'log_in_res')) {
-        return false;
-    };
+    nameValidate(firstName, 'log_in_res');
+    nameValidate(lastName, 'log_in_res');
+    emailValidate(email, 'log_in_res');
+    passwordValidate(password, 'log_in_res');
 
-    singUpService(firstName, lastName, email, password);
+    await singUpService(firstName, lastName, email, password);
 }
 
-exports.logIn = (data) => {
+exports.logIn = async (data) => {
     const { email, password, online } = data;
 
-    if (!emailValidate(email, 'log_in_res') || !passwordValidate(password, 'log_in_res')) {
-        return false;
-    };
-    if (!booleanValidate(online, "online_res")) {
-        return false;
-    };
-
-    logInService(email, password);
-    getUsersService(email, password);
-    onlineService(email, password, online);
+    passwordValidate(password, 'log_in_res');
+    emailValidate(email, 'log_in_res');
+    booleanValidate(online, "online_res");
+    
+    await logInService(email, password);
+    await getUsersService(email, password);
+    await onlineService(email, password, online);
 }
 
 exports.logOut = () => {
     logOutService();
 }
 
-exports.deleteUser = (data) => {
+exports.deleteUser = async (data) => {
     const { email, password } = data;
 
-    if (!emailValidate(email, "delete_user_res") || !passwordValidate(password, "delete_user_res")) {
-        return false;
-    };
+    emailValidate(email, "delete_user_res");
+    passwordValidate(password, "delete_user_res");
 
-    deleteUserService(email, password);
+    await deleteUserService(email, password);
 }
 
-exports.getUsers = (data) => {
+exports.getUsers = async (data) => {
     const { email, password, otherUser } = data;
 
-    if (!emailValidate(email, "get_users_res") || !passwordValidate(password, "get_users_res")) {
-        return false;
-    };
-    if (!idValidate(otherUser, "get_users_res")) {
-        return false;
-    };
+    emailValidate(email, "get_users_res");
+    passwordValidate(password, "get_users_res"); 
+    idValidate(otherUser, "get_users_res");
 
-    getUsersService(email, password, otherUser);
+    await getUsersService(email, password, otherUser);
 }
 
-exports.online = (data) => {
+exports.online = async (data) => {
     const { email, password, online } = data;
 
-    if (!emailValidate(email, "online_res") || !passwordValidate(password, "online_res")) {
-        return false;
-    };
-    if (!booleanValidate(online, "online_res")) {
-        return false;
-    };
+    emailValidate(email, "online_res"); 
+    passwordValidate(password, "online_res"); 
+    booleanValidate(online, "online_res");
 
-    onlineService(email, password, online);
+    await onlineService(email, password, online);
 }
 
 

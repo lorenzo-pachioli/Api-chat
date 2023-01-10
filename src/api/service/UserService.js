@@ -24,7 +24,7 @@ exports.logInService = async (_id) => {
             joinRoom(room._id)
         });
     };
-    return { status: true, user: userCheck, rooms: docRef };
+    return { status: true, rooms: docRef };
 }
 
 exports.deleteUserService = async (_id) => {

@@ -50,7 +50,7 @@ exports.logIn = async (data) => {
     const legedIn = await logInService(userCheck._id);
     const userList = await getUsersService();
     const isOnline = await onlineService(userCheck._id, online);
-    toEvent("log_in_res", legedIn);
+    toEvent("log_in_res", { ...legedIn, user: userCheck });
     toEvent("get_users_res", userList);
     socketsEvent("online_res", isOnline);
 }

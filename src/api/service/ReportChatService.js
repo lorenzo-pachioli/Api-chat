@@ -13,7 +13,7 @@ exports.initReportService = async (sender, receiver, room_id, complain, url) => 
     const newReport = reportModeling(sender, receiver, room_id, complain, url);
     const docRef = await newReport.save();
 
-    toEvent("init_report_res", { complain: docRef, status: true });
+    return { complain: docRef, status: true };
 }
 
 exports.getComplainsService = async (email, password) => {
@@ -24,5 +24,5 @@ exports.getComplainsService = async (email, password) => {
     const sentComplains = await Report.find({ sender: { $all: userCheck._id } });
     const recieveComplains = await Report.find({ receiver: { $all: userCheck._id } });
 
-    toEvent("get_complains_res", { sent: sentComplains, receive: recieveComplains, status: true })
+    return { sent: sentComplains, receive: recieveComplains, status: true };
 }

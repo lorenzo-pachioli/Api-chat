@@ -37,15 +37,16 @@ exports.initRoom = async (data) => {
 
 exports.sendMessage = async (data) => {
     const { _id, room, message } = data;
+    const room_id = room;
 
     if (!idValidate(_id, "send_msg_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room, "send_msg_res")) throw new Error("Incorrect room id form");
+    if (!idValidate(room_id, "send_msg_res")) throw new Error("Incorrect room id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to send a message");
-    if (!await roomExistByIdService(room._id)) throw new Error("The chat you're sending a message doesn't exist");
+    if (!await roomExistByIdService(room_id)) throw new Error("The chat you're sending a message doesn't exist");
 
-    const messageSent = await sendMessageService(_id, room, message);
-    socketsInEvent(room._id, "send_msg_res", messageSent);
+    const messageSent = await sendMessageService(_id, room_id, message);
+    socketsInEvent(room_id, "send_msg_res", messageSent);
 };
 
 exports.joinRoom = async (data) => {

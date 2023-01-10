@@ -1,4 +1,4 @@
-const { socketsEvent, socketsInEvent } = require('../helper/SocketUtils');
+const { socketsEvent, socketsInEvent, toEvent } = require('../helper/SocketUtils');
 const {
     initRoomService,
     sendMessageService,

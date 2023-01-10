@@ -32,7 +32,7 @@ exports.signUp = async (data) => {
     if (!emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
     if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
 
-    if (await userExistByEmailService(email)) throw new Error("Email used already has an account");
+    if (!await userExistByEmailService(email)) throw new Error("Email used already has an account");
 
     const userCreated = await singUpService(firstName, lastName, email, password);
     toEvent("sign_up_res", userCreated);

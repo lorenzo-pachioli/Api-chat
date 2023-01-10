@@ -68,6 +68,6 @@ exports.userExistService = async (_id) => {
 exports.userExistByEmailService = async (email) => {
 
     const user = await alreadyExistByEmail(email);
-    if (user) return false;
+    if (!user) return false;
     return user;
 }

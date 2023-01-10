@@ -4,7 +4,7 @@ const User = require("../models/User");
 const Room = require('../models/Room');
 const { toEvent, disconnectSocket, joinRoom, socketsEvent } = require('../helper/SocketUtils');
 const { userModeling } = require('../helper/ModelUtils');
-const { alreadyExistByEmail, checkPassword } = require('../validate/dbCheck');
+const { alreadyExistByEmail, checkPassword, alreadyExistById } = require('../validate/dbCheck');
 const Report = require('../models/Report');
 
 exports.singUpService = async (firstName, lastName, email, password) => {
@@ -74,4 +74,9 @@ exports.onlineService = async (email, password, online) => {
     const userOnline = await User.findByIdAndUpdate(userCheck._id, { online: online }, { new: true, password: 0 });
 
     socketsEvent("online_res", { user: userOnline, status: true });
+}
+
+exports.userExistService = async (_id) => {
+    if (!await alreadyExistById(_id, User)) return false;
+    return true;
 }

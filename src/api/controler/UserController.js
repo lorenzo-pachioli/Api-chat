@@ -16,7 +16,7 @@ const {
     booleanValidate
 } = require('../validate/syntaxCheck');
 
-async function validateUser(email, password) {
+exports.validateUser = async (email, password) => {
 
     const userCheck = await userExistByEmailService(email);
     if (!userCheck) throw new Error("Email used doesn't exist");
@@ -45,7 +45,7 @@ exports.logIn = async (data) => {
     if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
     if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
 
-    const userCheck = await validateUser(email, password);
+    const userCheck = await this.validateUser(email, password);
 
     const legedIn = await logInService(userCheck._id);
     const userList = await getUsersService();
@@ -65,7 +65,7 @@ exports.deleteUser = async (data) => {
     if (!emailValidate(email, "delete_user_res")) throw new Error("Incorrect email form");
     if (!passwordValidate(password, "delete_user_res")) throw new Error("Incorrect password form");
 
-    const userCheck = await validateUser(email, password);
+    const userCheck = await this.validateUser(email, password);
     const userDeleted = await deleteUserService(userCheck._id);
     socketsEvent("delete_user_res", userDeleted);
 }
@@ -77,7 +77,7 @@ exports.getUsers = async (data) => {
     if (!passwordValidate(password, "get_users_res")) throw new Error("Incorrect password form");
     if (!idValidate(otherUser, "get_users_res")) throw new Error("Incorrect id form");
 
-    await validateUser(email, password);
+    await this.validateUser(email, password);
 
     const userList = await getUsersService(email, password, otherUser);
     toEvent("get_users_res", userList);
@@ -90,7 +90,7 @@ exports.online = async (data) => {
     if (!passwordValidate(password, "online_res")) throw new Error("Incorrect password form");
     if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
 
-    const userCheck = await validateUser(email, password);
+    const userCheck = await this.validateUser(email, password);
 
     const isOnline = await onlineService(userCheck._id, online);
     socketsEvent("online_res", isOnline);

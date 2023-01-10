@@ -4,9 +4,25 @@ const {
     deleteUserService,
     getUsersService,
     logOutService,
-    onlineService
+    onlineService,
+    userExistByEmailService
 } = require('../service/UserService');
-const { idValidate, nameValidate, emailValidate, passwordValidate, booleanValidate } = require('../validate/syntaxCheck');
+const { checkPassword } = require('../validate/dbCheck');
+const {
+    idValidate,
+    nameValidate,
+    emailValidate,
+    passwordValidate,
+    booleanValidate
+} = require('../validate/syntaxCheck');
+
+async function validateUser(email, password) {
+
+    const userCheck = await userExistByEmailService(email);
+    if (!userCheck) throw new Error("Email used doesn't exist");
+    if (!checkPassword(password, userCheck.password)) throw new Error("Wrong password");
+    return userCheck;
+}
 
 exports.signUp = async (data) => {
     const { firstName, lastName, email, password } = data;
@@ -16,7 +32,10 @@ exports.signUp = async (data) => {
     if (!emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
     if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
 
-    await singUpService(firstName, lastName, email, password);
+    if (await userExistByEmailService(email)) throw new Error("Email used already has an account");
+
+    const userCreated = await singUpService(firstName, lastName, email, password);
+    toEvent("sign_up_res", userCreated);
 }
 
 exports.logIn = async (data) => {
@@ -26,9 +45,14 @@ exports.logIn = async (data) => {
     if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
     if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
 
-    await logInService(email, password);
-    await getUsersService(email, password);
-    await onlineService(email, password, online);
+    const userCheck = await validateUser(email, password);
+
+    const legedIn = await logInService(userCheck._id);
+    const userList = await getUsersService();
+    const isOnline = await onlineService(userCheck._id, online);
+    toEvent("log_in_res", legedIn);
+    toEvent("get_users_res", userList);
+    socketsEvent("online_res", isOnline);
 }
 
 exports.logOut = () => {
@@ -41,7 +65,9 @@ exports.deleteUser = async (data) => {
     if (!emailValidate(email, "delete_user_res")) throw new Error("Incorrect email form");
     if (!passwordValidate(password, "delete_user_res")) throw new Error("Incorrect password form");
 
-    await deleteUserService(email, password);
+    const userCheck = await validateUser(email, password);
+    const userDeleted = await deleteUserService(userCheck._id);
+    socketsEvent("delete_user_res", userDeleted);
 }
 
 exports.getUsers = async (data) => {
@@ -51,7 +77,10 @@ exports.getUsers = async (data) => {
     if (!passwordValidate(password, "get_users_res")) throw new Error("Incorrect password form");
     if (!idValidate(otherUser, "get_users_res")) throw new Error("Incorrect id form");
 
-    await getUsersService(email, password, otherUser);
+    await validateUser(email, password);
+
+    const userList = await getUsersService(email, password, otherUser);
+    toEvent("get_users_res", userList);
 }
 
 exports.online = async (data) => {
@@ -61,7 +90,8 @@ exports.online = async (data) => {
     if (!passwordValidate(password, "online_res")) throw new Error("Incorrect password form");
     if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
 
-    await onlineService(email, password, online);
+    const userCheck = await validateUser(email, password);
+
+    const isOnline = await onlineService(userCheck._id, online);
+    socketsEvent("online_res", isOnline);
 }
-
-

@@ -22,13 +22,14 @@ exports.initRoom = async (data) => {
     if (!await userExistService(otherUser)) throw new Error("The user you want to initiate a chat with doesn't exist");
 
     const roomCheck = await roomExistService(_id, otherUser);
-    if (roomCheck) {
-        if (roomCheck.messages.length > 0) {
-            await readByService(_id, roomCheck._id);
+    console.log(roomCheck);
+    if (roomCheck.length > 0) {
+        if (roomCheck[0].messages.length > 0) {
+            await readByService(_id, roomCheck[0]._id);
         };
-        await joinRoomService(roomCheck._id);
-        toEvent("init_room_res", { room: roomCheck, status: true });
-        return console.log(`Joined to room ${roomCheck._id}`);
+        await joinRoomService(roomCheck[0]._id);
+        toEvent("init_room_res", { room: roomCheck[0], status: true });
+        return console.log(`Joined to room ${roomCheck[0]._id}`);
     };
 
     const roomCreated = await initRoomService(_id, otherUser);

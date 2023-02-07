@@ -28,10 +28,10 @@ exports.validateUser = async (email, password) => {
 exports.signUp = async (data) => {
     const { firstName, lastName, email, password } = data;
 
-    if (!nameValidate(firstName, 'log_in_res')) throw new Error("Incorrect firstName form");
-    if (!nameValidate(lastName, 'log_in_res')) throw new Error("Incorrect lastName form");
-    if (!emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
-    if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
+    if (!nameValidate(firstName)) throw new Error("Incorrect firstName form");
+    if (!nameValidate(lastName)) throw new Error("Incorrect lastName form");
+    if (!emailValidate(email)) throw new Error("Incorrect email form");
+    if (!passwordValidate(password)) throw new Error("Incorrect password form");
 
     if (await userExistByEmailService(email)) throw new Error("Email used already has an account");
 
@@ -42,9 +42,9 @@ exports.signUp = async (data) => {
 exports.logIn = async (data) => {
     const { email, password, online } = data;
 
-    if (!emailValidate(email, 'log_in_res')) throw new Error("Incorrect email form");
-    if (!passwordValidate(password, 'log_in_res')) throw new Error("Incorrect password form");
-    if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
+    if (!emailValidate(email)) throw new Error("Incorrect email form");
+    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!booleanValidate(online)) throw new Error("Incorrect online form");
 
     const userCheck = await this.validateUser(email, password);
 
@@ -63,8 +63,8 @@ exports.logOut = () => {
 exports.deleteUser = async (data) => {
     const { email, password } = data;
 
-    if (!emailValidate(email, "delete_user_res")) throw new Error("Incorrect email form");
-    if (!passwordValidate(password, "delete_user_res")) throw new Error("Incorrect password form");
+    if (!emailValidate(email)) throw new Error("Incorrect email form");
+    if (!passwordValidate(password)) throw new Error("Incorrect password form");
 
     const userCheck = await this.validateUser(email, password);
     const userDeleted = await deleteUserService(userCheck._id);
@@ -74,9 +74,9 @@ exports.deleteUser = async (data) => {
 exports.getUsers = async (data) => {
     const { email, password, otherUser } = data;
 
-    if (!emailValidate(email, "get_users_res")) throw new Error("Incorrect email form");
-    if (!passwordValidate(password, "get_users_res")) throw new Error("Incorrect password form");
-    if (!idValidate(otherUser, "get_users_res")) throw new Error("Incorrect id form");
+    if (!emailValidate(email)) throw new Error("Incorrect email form");
+    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!idValidate(otherUser)) throw new Error("Incorrect id form");
 
     await this.validateUser(email, password);
 
@@ -87,9 +87,9 @@ exports.getUsers = async (data) => {
 exports.online = async (data) => {
     const { email, password, online } = data;
 
-    if (!emailValidate(email, "online_res")) throw new Error("Incorrect email form");
-    if (!passwordValidate(password, "online_res")) throw new Error("Incorrect password form");
-    if (!booleanValidate(online, "online_res")) throw new Error("Incorrect online form");
+    if (!emailValidate(email)) throw new Error("Incorrect email form");
+    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!booleanValidate(online)) throw new Error("Incorrect online form");
 
     const userCheck = await this.validateUser(email, password);
 

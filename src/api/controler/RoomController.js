@@ -15,8 +15,8 @@ const { idValidate } = require('../validate/syntaxCheck');
 exports.initRoom = async (data) => {
     const { _id, otherUser } = data;
 
-    if (!idValidate(_id, "init_room_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(otherUser, "init_room_res")) throw new Error("Incorrect otherUser id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(otherUser)) throw new Error("Incorrect otherUser id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to init chat");
     if (!await userExistService(otherUser)) throw new Error("The user you want to initiate a chat with doesn't exist");
@@ -40,8 +40,8 @@ exports.sendMessage = async (data) => {
     const { _id, room, message } = data;
     const room_id = room;
 
-    if (!idValidate(_id, "send_msg_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room_id, "send_msg_res")) throw new Error("Incorrect room id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(room_id)) throw new Error("Incorrect room id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to send a message");
     if (!await roomExistByIdService(room_id)) throw new Error("The chat you're sending a message doesn't exist");
@@ -53,8 +53,8 @@ exports.sendMessage = async (data) => {
 exports.joinRoom = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "init_room_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room_id, "init_room_res")) throw new Error("Incorrect room id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(room_id)) throw new Error("Incorrect room id form");
 
     await joinRoomService(_id, room_id);
 }
@@ -62,8 +62,8 @@ exports.joinRoom = async (data) => {
 exports.readBy = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "read_msg_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room_id, "read_msg_res")) throw new Error("Incorrect room id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(room_id)) throw new Error("Incorrect room id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to set messages as read");
     if (!await roomExistByIdService(room_id)) throw new Error("The chat you want to mark as read doesn't exist");
@@ -75,9 +75,9 @@ exports.readBy = async (data) => {
 exports.deleteMsg = async (data) => {
     const { _id, room_id, message_id } = data;
 
-    if (!idValidate(_id, "delete_msg_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room_id, "delete_msg_res")) throw new Error("Incorrect room id form");
-    if (!idValidate(message_id, "delete_msg_res")) throw new Error("Incorrect message id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(room_id)) throw new Error("Incorrect room id form");
+    if (!idValidate(message_id)) throw new Error("Incorrect message id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to delete messages");
     if (!await roomExistByIdService(room_id)) throw new Error("The chat you want to delete messages from doesn't exist");
@@ -89,8 +89,8 @@ exports.deleteMsg = async (data) => {
 exports.deleteChat = async (data) => {
     const { _id, room_id } = data;
 
-    if (!idValidate(_id, "read_msg_res")) throw new Error("Incorrect user id form");
-    if (!idValidate(room_id, "read_msg_res")) throw new Error("Incorrect room id form");
+    if (!idValidate(_id)) throw new Error("Incorrect user id form");
+    if (!idValidate(room_id)) throw new Error("Incorrect room id form");
 
     if (!await userExistService(_id)) throw new Error("Must be registered to delete a chat");
     if (!await roomExistByIdService(room_id)) throw new Error("The chat you want to delete doesn't exist");

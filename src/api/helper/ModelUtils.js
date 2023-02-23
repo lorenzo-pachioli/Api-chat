@@ -3,14 +3,14 @@ const Room = require('../models/Room');
 const User = require('../models/User');
 const Message = require('../models/Message');
 
-exports.userModeling = (firstName, lastName, email, hash) => {
+exports.userModeling = (firstName, lastName, email, hash, online = false) => {
     if (!firstName || !lastName || !email || !hash) return false;
     const newUser = User({
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
+        firstName,
+        lastName,
+        email,
         password: hash,
-        online: false
+        online
     });
     return newUser;
 }

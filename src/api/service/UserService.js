@@ -42,6 +42,16 @@ exports.logOutService = async () => {
     disconnectSocket(true);
 }
 
+exports.updateUserService = async (user) => {
+
+    if (password > 15) {
+        const salt = bcrypt.genSaltSync(saltRounds);
+        user.password = bcrypt.hashSync(user.password.toString(), salt);
+    }
+    const userUpdated = await User.updateOne({ _id: user._id }, user);
+    return { userUpdated, status: true };
+}
+
 exports.getUsersService = async (otherUser) => {
 
     if (otherUser) {

@@ -4,7 +4,8 @@ const {
     logOut,
     deleteUser,
     getUsers,
-    online
+    online,
+    updateUser
 } = require('../controler/UserController');
 
 exports.userRoute = (socket) => {
@@ -20,6 +21,7 @@ exports.userRoute = (socket) => {
         };
     });
     socket.on("log_out", () => logOut());
+    socket.on("upadate_user", data => updateUser(data));
     socket.on("delete_user", data => deleteUser(data));
     socket.on("get_users", data => getUsers(data));
     socket.on("online", data => online(data));

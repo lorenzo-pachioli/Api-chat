@@ -67,15 +67,19 @@ exports.updateUser = async (data) => {
     if (!nameValidate(firstName)) throw new Error("Incorrect firstName form");
     if (!nameValidate(lastName)) throw new Error("Incorrect lastName form");
     if (!emailValidate(email)) throw new Error("Incorrect email form");
-    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (password && !passwordValidate(password)) throw new Error("Incorrect password form");
 
     const user = await userExistByEmailService(email);
     if (!user) throw new Error("User to update doesn't exist");
 
     const userToUpdate = {
-        ...user,
-        data
+        ...user._doc,
+        firstName,
+        lastName,
+        email
     };
+    if (password.length > 0) userToUpdate.password = password;
+
     const userUpdated = await updateUserService(userToUpdate);
     toEvent("upadate_user_res", userUpdated);
 }

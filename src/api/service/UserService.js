@@ -44,11 +44,11 @@ exports.logOutService = async () => {
 
 exports.updateUserService = async (user) => {
 
-    if (password > 15) {
+    if (user.password && user.password.length <= 15) {
         const salt = bcrypt.genSaltSync(saltRounds);
         user.password = bcrypt.hashSync(user.password.toString(), salt);
     }
-    const userUpdated = await User.updateOne({ _id: user._id }, user);
+    const userUpdated = await User.findOneAndUpdate({ _id: user._id }, user, { new: true });
     return { userUpdated, status: true };
 }
 

@@ -5,7 +5,7 @@ const {
     deleteUser,
     getUsers,
     online
-} = require('../controler/UserController');
+} = require('../controller/UserController');
 
 exports.userRoute = (socket) => {
     console.log('id', socket.id);

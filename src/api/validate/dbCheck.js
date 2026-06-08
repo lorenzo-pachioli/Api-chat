@@ -1,6 +1,6 @@
 const Room = require('../models/Room');
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 async function alreadyExistByEmail(email) {
     const userCheck = await User.findOne({ email: email });
@@ -26,7 +26,7 @@ async function roomExistByUsersId(_id, otherUser) {
 };
 
 module.exports = {
-    alreadyExistByEmail, 
+    alreadyExistByEmail,
     alreadyExistById,
     checkPassword,
     roomExistByUsersId

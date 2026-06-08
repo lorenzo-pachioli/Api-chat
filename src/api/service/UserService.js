@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const User = require("../models/User");
 const Room = require('../models/Room');
@@ -14,6 +14,21 @@ exports.singUpService = async (firstName, lastName, email, password) => {
     const newUser = userModeling(firstName, lastName, email, hash);
     await newUser.save();
     return { status: true };
+}
+
+exports.authenticateUserService = async (email, password) => {
+
+    const user = await alreadyExistByEmail(email);
+
+    if (!user) {
+        throw new Error("Email used doesn't exist");
+    }
+
+    if (!bcrypt.compareSync(password, user.password)) {
+        throw new Error("Wrong password");
+    }
+
+    return user;
 }
 
 exports.logInService = async (_id) => {

@@ -1,4 +1,4 @@
-const { initReportController, getReportController } = require('../controler/ReportChatController');
+const { initReportController, getReportController } = require('../controller/ReportChatController');
 
 exports.reportChatRoute = (socket) => {
     socket.on("init_report", data => initReportController(data));

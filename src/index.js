@@ -10,7 +10,9 @@ const { Server } = require('socket.io');
 const { api } = require('./api/index');
 const { toEvent } = require('./api/helper/SocketUtils');
 const { returnError } = require('./api/helper/response');
+const cookieParser = require('cookie-parser');
 
+app.use(cookieParser());
 app.use(express.json());
 app.use(cors());
 

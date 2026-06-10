@@ -64,13 +64,23 @@ const authenticateSocket = async (socket) => {
 };
 
 exports.logIn = async (data, socket) => {
-    const { email, password, online } = data;
+    const { email, password, online, _id } = data;
     let userCheck = await authenticateSocket(socket);
 
     if (!userCheck) {
-        if (!emailValidate(email)) throw new Error("Incorrect email form");
-        if (!passwordValidate(password)) throw new Error("Incorrect password form");
-        userCheck = await this.validateUser(email, password);
+        // Fallback: si el front envía _id (post-login HTTP), autenticar por ID
+        if (_id) {
+            userCheck = await userExistService(_id);
+        }
+
+        // Fallback: credenciales clásicas
+        if (!userCheck && email && password) {
+            if (!emailValidate(email)) throw new Error("Incorrect email form");
+            if (!passwordValidate(password)) throw new Error("Incorrect password form");
+            userCheck = await exports.validateUser(email, password);
+        }
+
+        if (!userCheck) throw new Error("Authentication failed");
     }
 
     if (!booleanValidate(online)) throw new Error("Incorrect online form");
@@ -94,7 +104,7 @@ exports.deleteUser = async (data, socket) => {
     if (!userCheck) {
         if (!emailValidate(email)) throw new Error("Incorrect email form");
         if (!passwordValidate(password)) throw new Error("Incorrect password form");
-        userCheck = await this.validateUser(email, password);
+        userCheck = await exports.validateUser(email, password);
     }
 
     const userDeleted = await deleteUserService(userCheck._id);
@@ -108,7 +118,7 @@ exports.getUsers = async (data, socket) => {
     if (!userCheck) {
         if (!emailValidate(email)) throw new Error("Incorrect email form");
         if (!passwordValidate(password)) throw new Error("Incorrect password form");
-        await this.validateUser(email, password);
+        await exports.validateUser(email, password);
     }
 
     if (!idValidate(otherUser)) throw new Error("Incorrect id form");
@@ -124,7 +134,7 @@ exports.online = async (data, socket) => {
     if (!userCheck) {
         if (!emailValidate(email)) throw new Error("Incorrect email form");
         if (!passwordValidate(password)) throw new Error("Incorrect password form");
-        userCheck = await this.validateUser(email, password);
+        userCheck = await exports.validateUser(email, password);
     }
 
     if (!booleanValidate(online)) throw new Error("Incorrect online form");

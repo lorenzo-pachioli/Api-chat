@@ -5,7 +5,7 @@ const {
     deleteMsg,
     deleteChat,
     joinRoom
-} = require('../controler/RoomController');
+} = require('../controller/RoomController');
 
 exports.roomRoute = (socket) => {
     socket.on("init_room", data => initRoom(data));

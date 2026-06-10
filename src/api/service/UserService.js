@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const User = require("../models/User");
 const Room = require('../models/Room');
@@ -6,6 +6,7 @@ const { disconnectSocket, joinRoom } = require('../helper/SocketUtils');
 const { userModeling } = require('../helper/ModelUtils');
 const { alreadyExistByEmail, alreadyExistById } = require('../validate/dbCheck');
 const Report = require('../models/Report');
+const UserDTO = require('../dto/UserDTO');
 
 exports.singUpService = async (firstName, lastName, email, password) => {
 
@@ -14,6 +15,21 @@ exports.singUpService = async (firstName, lastName, email, password) => {
     const newUser = userModeling(firstName, lastName, email, hash);
     await newUser.save();
     return { status: true };
+}
+
+exports.authenticateUserService = async (email, password) => {
+
+    const user = await alreadyExistByEmail(email);
+
+    if (!user) {
+        throw new Error("Email used doesn't exist");
+    }
+
+    if (!bcrypt.compareSync(password, user.password)) {
+        throw new Error("Wrong password");
+    }
+
+    return user;
 }
 
 exports.logInService = async (_id) => {
@@ -35,7 +51,13 @@ exports.deleteUserService = async (_id) => {
     const docRef = await User.findByIdAndDelete(_id, { password: 0 });
     const newRooms = await Room.find({ users: { $all: _id.toString() } });
     const newUserList = await User.find({}, { password: 0 });
-    return { msg: "User deleted", userDeleted: docRef, rooms: newRooms, users: newUserList, status: true };
+    return { 
+        msg: "User deleted", 
+        userDeleted: docRef ? new UserDTO(docRef) : null, 
+        rooms: newRooms, 
+        users: newUserList.map(u => new UserDTO(u)), 
+        status: true 
+    };
 }
 
 exports.logOutService = async () => {
@@ -46,16 +68,16 @@ exports.getUsersService = async (otherUser) => {
 
     if (otherUser) {
         const docRef = await User.findById(otherUser, { password: 0 });
-        return { users: docRef, status: true };
+        return { users: docRef ? new UserDTO(docRef) : null, status: true };
     };
     const docRef = await User.find({}, { password: 0 });
-    return { users: docRef, status: true };
+    return { users: docRef.map(u => new UserDTO(u)), status: true };
 }
 
 exports.onlineService = async (_id, online) => {
 
     const userOnline = await User.findByIdAndUpdate(_id, { online: online }, { new: true, password: 0 });
-    return { user: userOnline, status: true };
+    return { user: userOnline ? new UserDTO(userOnline) : null, status: true };
 }
 
 exports.userExistService = async (_id) => {

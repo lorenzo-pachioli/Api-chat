@@ -14,7 +14,10 @@ const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+}));
 
 const server = http.createServer(app);
 
@@ -24,7 +27,8 @@ app.use('/auth', authRoutes);
 
 const io = new Server(server, {
     cors: {
-        origin: "*"
+        origin: process.env.CLIENT_URL,
+        credentials: true
     }
 });
 

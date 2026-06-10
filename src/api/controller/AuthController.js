@@ -1,7 +1,8 @@
 const {
     singUpService,
     userExistByEmailService,
-    logOutService
+    logOutService,
+    userExistService
 } = require('../service/UserService');
 const jwt = require('jsonwebtoken');
 const { validateUser } = require('../controller/UserController');
@@ -19,7 +20,7 @@ exports.authMeController = async (req, res, next) => {
         if (!token) return res.status(401).json({ success: false });
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await getUserByIdService(decoded._id);
+        const user = await userExistService(decoded._id);
         if (!user) return res.status(401).json({ success: false });
 
         return res.status(200).json({ success: true, user });

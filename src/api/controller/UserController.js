@@ -6,8 +6,10 @@ const {
     getUsersService,
     logOutService,
     onlineService,
-    userExistByEmailService
+    userExistByEmailService,
+    userExistService
 } = require('../service/UserService');
+const jwt = require('jsonwebtoken');
 const { checkPassword } = require('../validate/dbCheck');
 const {
     idValidate,
@@ -39,14 +41,38 @@ exports.signUp = async (data) => {
     toEvent("sign_up_res", userCreated);
 }
 
-exports.logIn = async (data) => {
+const authenticateSocket = async (socket) => {
+    try {
+        const cookieHeader = socket?.handshake?.headers?.cookie;
+        if (cookieHeader) {
+            const cookies = cookieHeader.split(';').reduce((acc, curr) => {
+                const [key, value] = curr.split('=').map(c => c.trim());
+                if (key && value) acc[key] = decodeURIComponent(value);
+                return acc;
+            }, {});
+            if (cookies.token) {
+                const decoded = jwt.verify(cookies.token, process.env.JWT_SECRET);
+                const user = await userExistService(decoded._id);
+                if (user) return user;
+            }
+        }
+    } catch (err) {
+        console.error("Socket authentication error:", err.message);
+    }
+    return null;
+};
+
+exports.logIn = async (data, socket) => {
     const { email, password, online } = data;
+    let userCheck = await authenticateSocket(socket);
 
-    if (!emailValidate(email)) throw new Error("Incorrect email form");
-    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!userCheck) {
+        if (!emailValidate(email)) throw new Error("Incorrect email form");
+        if (!passwordValidate(password)) throw new Error("Incorrect password form");
+        userCheck = await this.validateUser(email, password);
+    }
+
     if (!booleanValidate(online)) throw new Error("Incorrect online form");
-
-    const userCheck = await this.validateUser(email, password);
 
     const legedIn = await logInService(userCheck._id);
     const userList = await getUsersService();
@@ -60,38 +86,47 @@ exports.logOut = () => {
     logOutService();
 }
 
-exports.deleteUser = async (data) => {
+exports.deleteUser = async (data, socket) => {
     const { email, password } = data;
+    let userCheck = await authenticateSocket(socket);
 
-    if (!emailValidate(email)) throw new Error("Incorrect email form");
-    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!userCheck) {
+        if (!emailValidate(email)) throw new Error("Incorrect email form");
+        if (!passwordValidate(password)) throw new Error("Incorrect password form");
+        userCheck = await this.validateUser(email, password);
+    }
 
-    const userCheck = await this.validateUser(email, password);
     const userDeleted = await deleteUserService(userCheck._id);
     socketsEvent("delete_user_res", userDeleted);
 }
 
-exports.getUsers = async (data) => {
+exports.getUsers = async (data, socket) => {
     const { email, password, otherUser } = data;
+    let userCheck = await authenticateSocket(socket);
 
-    if (!emailValidate(email)) throw new Error("Incorrect email form");
-    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!userCheck) {
+        if (!emailValidate(email)) throw new Error("Incorrect email form");
+        if (!passwordValidate(password)) throw new Error("Incorrect password form");
+        await this.validateUser(email, password);
+    }
+
     if (!idValidate(otherUser)) throw new Error("Incorrect id form");
 
-    await this.validateUser(email, password);
-
-    const userList = await getUsersService(email, password, otherUser);
+    const userList = await getUsersService(otherUser);
     toEvent("get_users_res", userList);
 }
 
-exports.online = async (data) => {
+exports.online = async (data, socket) => {
     const { email, password, online } = data;
+    let userCheck = await authenticateSocket(socket);
 
-    if (!emailValidate(email)) throw new Error("Incorrect email form");
-    if (!passwordValidate(password)) throw new Error("Incorrect password form");
+    if (!userCheck) {
+        if (!emailValidate(email)) throw new Error("Incorrect email form");
+        if (!passwordValidate(password)) throw new Error("Incorrect password form");
+        userCheck = await this.validateUser(email, password);
+    }
+
     if (!booleanValidate(online)) throw new Error("Incorrect online form");
-
-    const userCheck = await this.validateUser(email, password);
 
     const isOnline = await onlineService(userCheck._id, online);
     socketsEvent("online_res", isOnline);

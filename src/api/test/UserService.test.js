@@ -37,6 +37,22 @@ const otherUser = {
     online: false
 };
 
+const newUserDTO = {
+    _id: newUser._id,
+    firstName: newUser.firstName,
+    lastName: newUser.lastName,
+    email: newUser.email,
+    online: newUser.online
+};
+
+const otherUserDTO = {
+    _id: otherUser._id,
+    firstName: otherUser.firstName,
+    lastName: otherUser.lastName,
+    email: otherUser.email,
+    online: otherUser.online
+};
+
 
 beforeAll((done) => {
     httpServer = http.createServer();
@@ -107,7 +123,7 @@ describe('UserService', () => {
 
             socket.on("log_in_res", (arg) => {
                 expect(arg.status).toBe(true);
-                expect(arg.user).toEqual({ ...newUser, password: hashedPass });
+                expect(arg.user).toEqual(newUserDTO);
                 expect(arg.rooms).toEqual([]);
                 done();
             });
@@ -162,7 +178,7 @@ describe('UserService', () => {
 
             socket.on("get_users_res", (arg) => {
                 expect(arg.status).toBe(true);
-                expect(arg.users).toEqual(users);
+                expect(arg.users).toEqual([newUserDTO, otherUserDTO]);
                 done();
             });
         });
@@ -177,7 +193,7 @@ describe('UserService', () => {
 
             socket.on("get_users_res", (arg) => {
                 expect(arg.status).toBe(true);
-                expect(arg.users).toEqual({ ...newUser, password: hashedPass });
+                expect(arg.users).toEqual(newUserDTO);
                 done();
             });
         });
@@ -196,7 +212,7 @@ describe('UserService', () => {
 
             socket.on("online_res", (arg) => {
                 expect(arg.status).toEqual(true)
-                expect(arg.user).toEqual({ ...newUser, online: true })
+                expect(arg.user).toEqual({ ...newUserDTO, online: true })
                 done();
             });
         });

@@ -13,6 +13,7 @@ const {
     passwordValidate
 } = require('../validate/syntaxCheck');
 const { response, logInResponse } = require('../helper/response');
+const UserDTO = require('../dto/UserDTO');
 
 exports.authMeController = async (req, res, next) => {
     try {
@@ -23,7 +24,7 @@ exports.authMeController = async (req, res, next) => {
         const user = await userExistService(decoded._id);
         if (!user) return res.status(401).json({ success: false });
 
-        return res.status(200).json({ success: true, user });
+        return res.status(200).json({ success: true, user: new UserDTO(user) });
     } catch (err) {
         res.status(401).json({ success: false });
     }
@@ -53,12 +54,7 @@ exports.logInController = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            user: {
-                _id: userCheck._id,
-                firstName: userCheck.firstName,
-                lastName: userCheck.lastName,
-                email: userCheck.email
-            }
+            user: new UserDTO(userCheck)
         });
 
     } catch (err) {
@@ -99,10 +95,7 @@ exports.logInController2 = async (req, res, next) => {
 
         return res.status(200).json({
             success: true,
-            user: {
-                _id: userCheck._id, firstName: userCheck.firstName,
-                lastName: userCheck.lastName, email: userCheck.email
-            }
+            user: new UserDTO(userCheck)
         });
     } catch (err) { next(err); }
 };

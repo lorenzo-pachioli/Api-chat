@@ -18,6 +18,7 @@ const {
     passwordValidate,
     booleanValidate
 } = require('../validate/syntaxCheck');
+const UserDTO = require('../dto/UserDTO');
 
 exports.validateUser = async (email, password) => {
 
@@ -77,7 +78,7 @@ exports.logIn = async (data, socket) => {
     const legedIn = await logInService(userCheck._id);
     const userList = await getUsersService();
     const isOnline = await onlineService(userCheck._id, online);
-    toEvent("log_in_res", { ...legedIn, user: userCheck });
+    toEvent("log_in_res", { ...legedIn, user: new UserDTO(userCheck) });
     toEvent("get_users_res", userList);
     socketsEvent("online_res", isOnline);
 }
